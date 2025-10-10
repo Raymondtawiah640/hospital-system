@@ -1,0 +1,142 @@
+<div *ngIf="isLoggedIn; else loginRedirect">
+  <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
+    <h2 class="text-2xl font-bold text-blue-900 mb-6">Add New Patient</h2>
+
+    <!-- Success or Error message -->
+    <div *ngIf="message" class="mt-4">
+      <div [ngClass]="{'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4': message.startsWith('✅'), 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4': message.startsWith('❌')}">{{ message }}</div>
+    </div>
+
+    <form (ngSubmit)="onSubmit($event)" #patientForm="ngForm">
+      <!-- Personal Information -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- First Name -->
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">First Name <span [class.text-red-500]="!firstNameModel?.valid" [class.text-green-500]="firstNameModel?.valid">*</span></label>
+          <input #firstNameModel="ngModel" type="text" [(ngModel)]="firstName" name="firstName" placeholder="Enter first name"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+        </div>
+
+        <!-- Last Name -->
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Last Name <span [class.text-red-500]="!lastNameModel?.valid" [class.text-green-500]="lastNameModel?.valid">*</span></label>
+          <input #lastNameModel="ngModel" type="text" [(ngModel)]="lastName" name="lastName" placeholder="Enter last name"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+        </div>
+
+        <!-- Ghana Card Number -->
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Ghana Card Number <span [class.text-red-500]="!ghanaCardNumberModel?.valid" [class.text-green-500]="ghanaCardNumberModel?.valid">*</span></label>
+          <input #ghanaCardNumberModel="ngModel" type="text" [(ngModel)]="ghanaCardNumber" name="ghanaCardNumber" placeholder="GHA-XXXXXXXXX-X"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+        </div>
+
+        <!-- Date of Birth -->
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Date of Birth <span [class.text-red-500]="!dateOfBirthModel?.valid" [class.text-green-500]="dateOfBirthModel?.valid">*</span></label>
+          <input #dateOfBirthModel="ngModel" type="date" [(ngModel)]="dateOfBirth" name="dateOfBirth"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+        </div>
+
+        <!-- Gender -->
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Gender <span [class.text-red-500]="!genderModel?.valid" [class.text-green-500]="genderModel?.valid">*</span></label>
+          <select #genderModel="ngModel" [(ngModel)]="gender" name="gender"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+            <option value="">Select gender</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <!-- Blood Group -->
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Blood Group <span [class.text-red-500]="!bloodGroupModel?.valid" [class.text-green-500]="bloodGroupModel?.valid">*</span></label>
+          <select #bloodGroupModel="ngModel" [(ngModel)]="bloodGroup" name="bloodGroup"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+            <option value="">Select blood group</option>
+            <option>A+</option>
+            <option>A-</option>
+            <option>B+</option>
+            <option>B-</option>
+            <option>O+</option>
+            <option>O-</option>
+            <option>AB+</option>
+            <option>AB-</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Contact Information -->
+      <h3 class="text-xl font-semibold text-blue-800 mt-8 mb-4">Contact Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Phone -->
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Phone Number <span [class.text-red-500]="!phoneNumberModel?.valid" [class.text-green-500]="phoneNumberModel?.valid">*</span></label>
+          <input #phoneNumberModel="ngModel" type="tel" [(ngModel)]="phoneNumber" name="phoneNumber" placeholder="+233 24 123 4567"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Email <span [class.text-red-500]="!emailModel?.valid" [class.text-green-500]="emailModel?.valid">*</span></label>
+          <input #emailModel="ngModel" type="email" [(ngModel)]="email" name="email" placeholder="patient@example.com"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+        </div>
+
+        <!-- Address -->
+        <div class="md:col-span-2">
+          <label class="block text-gray-700 font-semibold mb-2">Residential Address <span [class.text-red-500]="!residentialAddrModel?.valid" [class.text-green-500]="residentialAddrModel?.valid">*</span></label>
+          <textarea #residentialAddrModel="ngModel" rows="2" [(ngModel)]="residentialAddr" name="residentialAddr" placeholder="Enter address"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required></textarea>
+        </div>
+      </div>
+
+      <!-- Emergency Contact -->
+      <h3 class="text-xl font-semibold text-blue-800 mt-8 mb-4">Emergency Contact</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Name <span [class.text-red-500]="!emergencyNameModel?.valid" [class.text-green-500]="emergencyNameModel?.valid">*</span></label>
+          <input #emergencyNameModel="ngModel" type="text" [(ngModel)]="emergencyName" name="emergencyName" placeholder="Emergency contact name"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+        </div>
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Phone Number <span [class.text-red-500]="!emergencyPhoneModel?.valid" [class.text-green-500]="emergencyPhoneModel?.valid">*</span></label>
+          <input #emergencyPhoneModel="ngModel" type="tel" [(ngModel)]="emergencyPhone" name="emergencyPhone" placeholder="+233 20 987 6543"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="mt-8 flex justify-end">
+        <button type="submit"
+          [disabled]="!patientForm.form.valid || isLoading"
+          class="flex items-center gap-2 bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-60 disabled:cursor-not-allowed">
+
+          <!-- Spinner Icon -->
+          <svg *ngIf="isLoading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+              viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"></path>
+          </svg>
+
+          <!-- Button Text -->
+          <span *ngIf="isLoading">Saving...</span>
+          <span *ngIf="!isLoading">Save Patient</span>
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<!-- Login Redirect Message -->
+<ng-template #loginRedirect>
+  <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
+    <h2 class="text-2xl font-bold text-blue-900 mb-6">Access Denied</h2>
+    <p class="text-lg text-red-600">You need to be logged in to access this page. Please <a href="/login" class="text-blue-600">log in</a>.</p>
+  </div>
+</ng-template>

@@ -1,0 +1,57 @@
+<!-- footer.component.html -->
+<footer class="bg-blue-900 text-white py-10">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+
+    <!-- Logo & Description -->
+    <div class="flex flex-col items-center space-y-4">
+      <img src="logo.png" alt="Hospital Logo" class="w-16 h-16 rounded-full">
+      <p class="text-gray-300 leading-relaxed text-sm max-w-xl">
+        Providing trusted healthcare services with advanced facilities, professional doctors, and compassionate care for every patient.
+      </p>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="mt-10">
+      <h2 class="text-xl font-bold text-green-400 mb-4">Contact Us</h2>
+      <ul class="flex items-center justify-center space-x-8 text-gray-300 text-2xl">
+        <!-- Location (no link) -->
+        <li class="relative group cursor-pointer">
+          <i class="fas fa-map-marker-alt text-green-400"></i>
+          <span class="absolute bottom-full mb-2 w-max opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 text-white text-xs rounded py-1 px-2">
+            123 Main Street, City, Country
+          </span>
+        </li>
+
+        <!-- Phone -->
+        <li class="relative group cursor-pointer">
+          <a href="tel:+1234567890">
+            <i class="fas fa-phone-alt text-green-400"></i>
+          </a>
+          <span class="absolute bottom-full mb-2 w-max opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 text-white text-xs rounded py-1 px-2">
+            +123 456 7890
+          </span>
+        </li>
+
+        <!-- Email -->
+        <li class="relative group cursor-pointer">
+          <a href="mailto:contact@hospital.com">
+            <i class="fas fa-envelope text-green-400"></i>
+          </a>
+          <span class="absolute bottom-full mb-2 w-max opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 text-white text-xs rounded py-1 px-2">
+            contact@hospital.com
+          </span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Bottom Footer -->
+    <div class="border-t border-gray-700 mt-10 pt-4 text-gray-400 text-sm">
+      <p>&copy; <span id="year"></span> <span class="text-white font-semibold">Hospital System</span>. All Rights Reserved.</p>
+    </div>
+  </div>
+
+  <!-- Script for Dynamic Year -->
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</footer>

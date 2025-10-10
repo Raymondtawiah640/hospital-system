@@ -1,0 +1,181 @@
+<div class="min-h-screen bg-gray-100 p-6 space-y-8">
+
+  <!-- Page Header -->
+  <div class="max-w-7xl mx-auto mb-6">
+    <h1 class="text-3xl font-bold text-blue-700">Invoices</h1>
+    <p class="text-gray-600 mt-1">
+      Manage all hospital invoices, view payment status, and track pending and completed transactions.
+    </p>
+  </div>
+
+  <!-- Success and Error Messages -->
+  <div *ngIf="successMessage" class="max-w-7xl mx-auto text-green-500 text-center mb-4">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="max-w-7xl mx-auto text-red-500 text-center mb-4">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Invoice Summary Cards -->
+  <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+    <div class="bg-white shadow-lg rounded-lg p-6 border-l-4 border-blue-500">
+      <h2 class="text-gray-500 text-sm font-medium">Total Invoices</h2>
+      <p class="text-3xl font-bold text-blue-600">{{ totalInvoices }}</p>
+    </div>
+    <div class="bg-white shadow-lg rounded-lg p-6 border-l-4 border-green-500">
+      <h2 class="text-gray-500 text-sm font-medium">Paid Invoices</h2>
+      <p class="text-3xl font-bold text-green-600">{{ paidInvoices }}</p>
+    </div>
+    <div class="bg-white shadow-lg rounded-lg p-6 border-l-4 border-yellow-500">
+      <h2 class="text-gray-500 text-sm font-medium">Pending Invoices</h2>
+      <p class="text-3xl font-bold text-yellow-600">{{ pendingInvoices }}</p>
+    </div>
+    <div class="bg-white shadow-lg rounded-lg p-6 border-l-4 border-red-500">
+      <h2 class="text-gray-500 text-sm font-medium">Overdue Invoices</h2>
+      <p class="text-3xl font-bold text-red-600">{{ overdueInvoices }}</p>
+    </div>
+  </div>
+
+  <!-- Search Invoices -->
+  <div class="max-w-7xl mx-auto mb-6">
+    <div class="w-full md:w-1/2">
+      <input type="text" [(ngModel)]="searchTerm" placeholder="Search invoices..."
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none">
+    </div>
+  </div>
+
+  <!-- Invoices Table -->
+  <div class="max-w-7xl mx-auto overflow-x-auto">
+    <table class="min-w-full bg-white rounded-lg shadow-md overflow-hidden">
+      <thead class="bg-blue-700 text-white">
+        <tr>
+          <th class="px-4 py-2 text-left">Invoice #</th>
+          <th class="px-4 py-2 text-left">Patient</th>
+          <th class="px-4 py-2 text-left">Doctor</th>
+          <th class="px-4 py-2 text-left">Amount</th>
+          <th class="px-4 py-2 text-left">Date</th>
+          <th class="px-4 py-2 text-left">Status</th>
+          <th class="px-4 py-2 text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <!-- Loading row -->
+        <tr *ngIf="isLoading">
+          <td colspan="7" class="text-center py-4 text-gray-500">
+            <div class="flex justify-center items-center">
+              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              <span class="ml-2">Loading invoices...</span>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Error row -->
+        <tr *ngIf="errorMessage && !isLoading">
+          <td colspan="7" class="text-center py-4 text-red-500">{{ errorMessage }}</td>
+        </tr>
+
+        <!-- Data rows -->
+        <tr *ngFor="let invoice of filteredInvoices" class="hover:bg-gray-50">
+          <td class="px-4 py-2">{{ invoice.invoice_number }}</td>
+          <td class="px-4 py-2">{{ invoice.patient_name }}</td>
+          <td class="px-4 py-2">{{ invoice.doctor_name }}</td>
+          <td class="px-4 py-2">GH₵{{ invoice.amount }}</td>
+          <td class="px-4 py-2">{{ invoice.date }}</td>
+          <td class="px-4 py-2">
+            <span [ngClass]="getStatusClass(invoice.status)">{{ invoice.status | titlecase }}</span>
+          </td>
+          <td class="px-4 py-2 text-center">
+            <button (click)="viewInvoice(invoice)" class="text-blue-600 hover:text-blue-800 mx-1">View</button>
+            <button (click)="deleteInvoice(invoice)" class="text-red-600 hover:text-red-800 mx-1">Delete</button>
+          </td>
+        </tr>
+
+        <!-- No invoices row -->
+        <tr *ngIf="!isLoading && !errorMessage && filteredInvoices.length === 0">
+          <td colspan="7" class="text-center py-4 text-gray-500">No invoices found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="max-w-7xl mx-auto mt-6 flex justify-between items-center">
+    <div class="text-sm text-gray-600">
+      Page {{ currentPage }} of {{ totalPages }} ({{ totalInvoices }} total invoices)
+    </div>
+    <div>
+      <button (click)="prevPage()" [disabled]="currentPage <= 1"
+        class="px-3 py-1 bg-gray-200 rounded-l hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">Prev</button>
+      <button (click)="nextPage()" [disabled]="currentPage >= totalPages"
+        class="px-3 py-1 bg-gray-200 rounded-r hover:bg-gray-300 ml-1 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+    </div>
+  </div>
+
+  <!-- View Invoice Modal -->
+  <div *ngIf="showViewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-4xl max-h-screen overflow-y-auto">
+      <h2 class="text-xl font-bold mb-4">Invoice Details</h2>
+      <div *ngIf="selectedInvoice" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p><strong>Invoice Number:</strong> {{ selectedInvoice.invoice_number }}</p>
+            <p><strong>Patient:</strong> {{ selectedInvoice.patient_name }}</p>
+            <p><strong>Doctor:</strong> {{ selectedInvoice.doctor_name }}</p>
+          </div>
+          <div>
+            <p><strong>Amount:</strong> GH₵{{ selectedInvoice.amount }}</p>
+            <p><strong>Date:</strong> {{ selectedInvoice.date }}</p>
+            <p><strong>Status:</strong> <span [ngClass]="getStatusClass(selectedInvoice.status)">{{ selectedInvoice.status | titlecase }}</span></p>
+          </div>
+        </div>
+
+        <!-- Prescribed Medications -->
+        <div class="mt-6">
+          <h3 class="text-lg font-semibold mb-3">Prescribed Medications</h3>
+          <div *ngIf="prescriptions.length > 0" class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-300">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Medication</th>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Dosage</th>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Instructions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <tr *ngFor="let prescription of prescriptions" class="hover:bg-gray-50">
+                  <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ prescription.medicine_name || prescription.name }}</td>
+                  <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ prescription.dosage }}</td>
+                  <td class="px-4 py-2 text-sm text-gray-900">{{ prescription.instructions }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div *ngIf="prescriptions.length === 0" class="text-gray-500 italic">
+            No medications prescribed for this patient.
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end space-x-2 mt-6">
+        <button (click)="printInvoice()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Print Invoice</button>
+        <button (click)="closeModals()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+      <h2 class="text-xl font-bold mb-4">Confirm Delete</h2>
+      <p class="mb-4">Are you sure you want to delete this invoice? This action cannot be undone.</p>
+      <div *ngIf="selectedInvoice" class="bg-gray-100 p-3 rounded mb-4">
+        <p><strong>Invoice:</strong> {{ selectedInvoice.invoice_number }}</p>
+        <p><strong>Patient:</strong> {{ selectedInvoice.patient_name }}</p>
+      </div>
+      <div class="flex justify-end space-x-2">
+        <button (click)="closeModals()" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancel</button>
+        <button (click)="confirmDelete()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Delete</button>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,140 @@
+<div class="min-h-screen bg-gray-100 p-6 space-y-8">
+
+  <!-- Page Header -->
+  <div class="max-w-7xl mx-auto mb-6">
+    <h1 class="text-3xl font-bold text-blue-700">Daily Reports</h1>
+    <p class="text-gray-600 mt-1">
+      View daily statistics and reports for hospital activities.
+    </p>
+  </div>
+
+  <!-- Success and Error Messages -->
+  <div *ngIf="successMessage" class="max-w-7xl mx-auto text-green-500 text-center mb-4">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="max-w-7xl mx-auto text-red-500 text-center mb-4">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Date Selector -->
+  <div class="max-w-7xl mx-auto mb-6">
+    <label class="block text-gray-700 text-sm font-bold mb-2">Select Date</label>
+    <input type="date" [(ngModel)]="selectedDate" (change)="onDateChange()"
+      class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none">
+  </div>
+
+  <!-- Daily Summary Cards -->
+  <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
+    <div class="bg-white shadow-lg rounded-lg p-6 border-l-4 border-blue-500">
+      <h2 class="text-gray-500 text-sm font-medium">Total Patients</h2>
+      <p class="text-3xl font-bold text-blue-600">{{ reportData.totalPatients }}</p>
+    </div>
+    <div class="bg-white shadow-lg rounded-lg p-6 border-l-4 border-purple-500">
+      <h2 class="text-gray-500 text-sm font-medium">Total Lab Tests</h2>
+      <p class="text-3xl font-bold text-purple-600">{{ reportData.totalLabTests }}</p>
+    </div>
+    <div class="bg-white shadow-lg rounded-lg p-6 border-l-4 border-green-500">
+      <h2 class="text-gray-500 text-sm font-medium">Total Prescriptions</h2>
+      <p class="text-3xl font-bold text-green-600">{{ reportData.totalPrescriptions }}</p>
+    </div>
+    <div class="bg-white shadow-lg rounded-lg p-6 border-l-4 border-yellow-500">
+      <h2 class="text-gray-500 text-sm font-medium">Total Bills</h2>
+      <p class="text-3xl font-bold text-yellow-600">{{ reportData.totalBills }}</p>
+    </div>
+    <div class="bg-white shadow-lg rounded-lg p-6 border-l-4 border-red-500">
+      <h2 class="text-gray-500 text-sm font-medium">Total Revenue</h2>
+      <p class="text-3xl font-bold text-red-600">GH₵{{ reportData.totalRevenue }}</p>
+    </div>
+  </div>
+
+  <!-- Lab Tests Section -->
+  <div class="max-w-7xl mx-auto mb-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Lab Tests</h2>
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <table class="min-w-full">
+        <thead class="bg-blue-700 text-white">
+          <tr>
+            <th class="px-4 py-2 text-left">Patient Name</th>
+            <th class="px-4 py-2 text-left">Doctor Name</th>
+            <th class="px-4 py-2 text-left">Test Name</th>
+            <th class="px-4 py-2 text-left">Status</th>
+            <th class="px-4 py-2 text-left">Type</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr *ngFor="let test of reportData.labTests" class="hover:bg-gray-50">
+            <td class="px-4 py-2">{{ test.patient_name }}</td>
+            <td class="px-4 py-2">{{ test.doctor_name }}</td>
+            <td class="px-4 py-2">{{ test.test_name }}</td>
+            <td class="px-4 py-2">
+              <span [ngClass]="test.status === 'completed' ? 'text-green-600 font-semibold' : 'text-yellow-600 font-semibold'">
+                {{ test.status | titlecase }}
+              </span>
+            </td>
+            <td class="px-4 py-2">{{ test.type }}</td>
+          </tr>
+          <tr *ngIf="reportData.labTests.length === 0">
+            <td colspan="5" class="text-center py-4 text-gray-500">No lab tests for this date.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Prescriptions Section -->
+  <div class="max-w-7xl mx-auto mb-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Prescriptions</h2>
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <table class="min-w-full">
+        <thead class="bg-blue-700 text-white">
+          <tr>
+            <th class="px-4 py-2 text-left">Patient Name</th>
+            <th class="px-4 py-2 text-left">Doctor Name</th>
+            <th class="px-4 py-2 text-left">Medicines</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr *ngFor="let prescription of reportData.prescriptions" class="hover:bg-gray-50">
+            <td class="px-4 py-2">{{ prescription.patient_name }}</td>
+            <td class="px-4 py-2">{{ prescription.doctor_name }}</td>
+            <td class="px-4 py-2">{{ prescription.medicines }}</td>
+          </tr>
+          <tr *ngIf="reportData.prescriptions.length === 0">
+            <td colspan="3" class="text-center py-4 text-gray-500">No prescriptions for this date.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Bills Section -->
+  <div class="max-w-7xl mx-auto">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Bills</h2>
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <table class="min-w-full">
+        <thead class="bg-blue-700 text-white">
+          <tr>
+            <th class="px-4 py-2 text-left">Patient Name</th>
+            <th class="px-4 py-2 text-left">Amount</th>
+            <th class="px-4 py-2 text-left">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr *ngFor="let bill of reportData.bills" class="hover:bg-gray-50">
+            <td class="px-4 py-2">{{ bill.patient_name }}</td>
+            <td class="px-4 py-2">GH₵{{ bill.amount }}</td>
+            <td class="px-4 py-2">
+              <span [ngClass]="bill.status === 'paid' ? 'text-green-600 font-semibold' : 'text-yellow-600 font-semibold'">
+                {{ bill.status | titlecase }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="reportData.bills.length === 0">
+            <td colspan="3" class="text-center py-4 text-gray-500">No bills for this date.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

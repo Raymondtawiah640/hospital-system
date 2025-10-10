@@ -1,0 +1,196 @@
+<div *ngIf="isLoggedIn">
+  <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
+    <h2 class="text-2xl font-bold text-blue-900 mb-6">Add New Doctor</h2>
+
+    <!-- Success and Error Messages -->
+    <div *ngIf="successMessage" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{ errorMessage }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #doctorForm="ngForm">
+      <!-- Doctor Identification -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label for="doctorId" class="block text-gray-700 font-semibold mb-2">
+            Doctor ID <span [ngClass]="getAsteriskClass('doctorId')" class="text-lg">*</span>
+          </label>
+          <input #doctorId="ngModel" id="doctorId" name="doctorId" [(ngModel)]="doctorData.doctorId" required
+            (input)="onFieldChange('doctorId')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            [class.border-red-500]="doctorId?.invalid && doctorId?.touched"
+            [class.border-green-500]="doctorId?.valid && doctorId?.touched">
+        </div>
+        <div>
+          <label for="ghanaCard" class="block text-gray-700 font-semibold mb-2">
+            Ghana Card Number <span [ngClass]="getAsteriskClass('ghanaCard')" class="text-lg">*</span>
+          </label>
+          <input #ghanaCard="ngModel" id="ghanaCard" name="ghanaCard" [(ngModel)]="doctorData.ghanaCard" required
+            (input)="onFieldChange('ghanaCard')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            [class.border-red-500]="ghanaCard?.invalid && ghanaCard?.touched"
+            [class.border-green-500]="ghanaCard?.valid && ghanaCard?.touched">
+        </div>
+      </div>
+
+      <!-- Personal Information -->
+      <h3 class="text-xl font-semibold text-blue-800 mt-8 mb-4">Personal Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label for="firstName" class="block text-gray-700 font-semibold mb-2">
+            First Name <span [ngClass]="getAsteriskClass('firstName')" class="text-lg">*</span>
+          </label>
+          <input #firstName="ngModel" id="firstName" name="firstName" [(ngModel)]="doctorData.firstName" required
+            (input)="onFieldChange('firstName')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            [class.border-red-500]="firstName?.invalid && firstName?.touched"
+            [class.border-green-500]="firstName?.valid && firstName?.touched">
+        </div>
+        <div>
+          <label for="lastName" class="block text-gray-700 font-semibold mb-2">
+            Last Name <span [ngClass]="getAsteriskClass('lastName')" class="text-lg">*</span>
+          </label>
+          <input #lastName="ngModel" id="lastName" name="lastName" [(ngModel)]="doctorData.lastName" required
+            (input)="onFieldChange('lastName')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            [class.border-red-500]="lastName?.invalid && lastName?.touched"
+            [class.border-green-500]="lastName?.valid && lastName?.touched">
+        </div>
+        <div>
+          <label for="dob" class="block text-gray-700 font-semibold mb-2">
+            Date of Birth <span [ngClass]="getAsteriskClass('dob')" class="text-lg">*</span>
+          </label>
+          <input #dob="ngModel" id="dob" name="dob" [(ngModel)]="doctorData.dob" type="date" required
+            (input)="onFieldChange('dob')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            [class.border-red-500]="dob?.invalid && dob?.touched"
+            [class.border-green-500]="dob?.valid && dob?.touched">
+        </div>
+        <div>
+          <label for="gender" class="block text-gray-700 font-semibold mb-2">
+            Gender <span [ngClass]="getAsteriskClass('gender')" class="text-lg">*</span>
+          </label>
+          <select #gender="ngModel" id="gender" name="gender" [(ngModel)]="doctorData.gender" required
+            (change)="onFieldChange('gender')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            [class.border-red-500]="gender?.invalid && gender?.touched"
+            [class.border-green-500]="gender?.valid && gender?.touched">
+            <option value="">Select gender</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Professional Information -->
+      <h3 class="text-xl font-semibold text-blue-800 mt-8 mb-4">Professional Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label for="specialization" class="block text-gray-700 font-semibold mb-2">
+            Specialization <span [ngClass]="getAsteriskClass('specialization')" class="text-lg">*</span>
+          </label>
+          <input #specialization="ngModel" id="specialization" name="specialization" [(ngModel)]="doctorData.specialization" required
+            (input)="onFieldChange('specialization')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            [class.border-red-500]="specialization?.invalid && specialization?.touched"
+            [class.border-green-500]="specialization?.valid && specialization?.touched">
+        </div>
+        <div>
+          <label for="department" class="block text-gray-700 font-semibold mb-2">
+            Department <span [ngClass]="getAsteriskClass('department')" class="text-lg">*</span>
+          </label>
+          <select #department="ngModel" id="department" name="department" [(ngModel)]="doctorData.department" required
+            (change)="onFieldChange('department')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            [class.border-red-500]="department?.invalid && department?.touched"
+            [class.border-green-500]="department?.valid && department?.touched">
+            <option value="">Select department</option>
+            <option>General Medicine</option>
+            <option>Cardiology</option>
+            <option>Pediatrics</option>
+            <option>Emergency</option>
+            <option>Laboratory</option>
+            <option>Pharmacy</option>
+            <option>Surgery</option>
+          </select>
+        </div>
+        <div>
+          <label for="experience" class="block text-gray-700 font-semibold mb-2">
+            Years of Experience <span [ngClass]="getAsteriskClass('experience')" class="text-lg">*</span>
+          </label>
+          <input #experience="ngModel" id="experience" name="experience" [(ngModel)]="doctorData.experience" type="number" min="0" required
+            (input)="onFieldChange('experience')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            [class.border-red-500]="experience?.invalid && experience?.touched"
+            [class.border-green-500]="experience?.valid && experience?.touched">
+        </div>
+        <div>
+          <label for="license" class="block text-gray-700 font-semibold mb-2">
+            Medical License Number <span [ngClass]="getAsteriskClass('license')" class="text-lg">*</span>
+          </label>
+          <input #license="ngModel" id="license" name="license" [(ngModel)]="doctorData.license" required
+            (input)="onFieldChange('license')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            [class.border-red-500]="license?.invalid && license?.touched"
+            [class.border-green-500]="license?.valid && license?.touched">
+        </div>
+      </div>
+
+      <!-- Contact Information -->
+      <h3 class="text-xl font-semibold text-blue-800 mt-8 mb-4">Contact Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label for="phone" class="block text-gray-700 font-semibold mb-2">
+            Phone Number <span [ngClass]="getAsteriskClass('phone')" class="text-lg">*</span>
+          </label>
+          <input #phone="ngModel" id="phone" name="phone" [(ngModel)]="doctorData.phone" type="tel" required
+            (input)="onFieldChange('phone')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            [class.border-red-500]="phone?.invalid && phone?.touched"
+            [class.border-green-500]="phone?.valid && phone?.touched">
+        </div>
+        <div>
+          <label for="email" class="block text-gray-700 font-semibold mb-2">
+            Email <span [ngClass]="getAsteriskClass('email')" class="text-lg">*</span>
+          </label>
+          <input #email="ngModel" id="email" name="email" [(ngModel)]="doctorData.email" type="email" required
+            (input)="onFieldChange('email')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            [class.border-red-500]="email?.invalid && email?.touched"
+            [class.border-green-500]="email?.valid && email?.touched">
+        </div>
+        <div class="md:col-span-2">
+          <label for="address" class="block text-gray-700 font-semibold mb-2">
+            Residential Address <span [ngClass]="getAsteriskClass('address')" class="text-lg">*</span>
+          </label>
+          <textarea #address="ngModel" id="address" name="address" [(ngModel)]="doctorData.address" rows="2" required
+            (input)="onFieldChange('address')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            [class.border-red-500]="address?.invalid && address?.touched"
+            [class.border-green-500]="address?.valid && address?.touched"></textarea>
+        </div>
+      </div>
+
+      <!-- Submit Button with Loading Spinner -->
+      <div class="mt-8 flex justify-end">
+        <button type="submit"
+                [disabled]="!doctorForm.form.valid || isLoading"
+                class="flex items-center justify-center gap-2 bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-60 disabled:cursor-not-allowed">
+
+          <!-- Spinner -->
+          <svg *ngIf="isLoading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"></path>
+          </svg>
+
+          <!-- Button Text -->
+          <span *ngIf="isLoading">Saving...</span>
+          <span *ngIf="!isLoading">Save Doctor</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

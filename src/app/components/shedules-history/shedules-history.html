@@ -1,0 +1,97 @@
+<div class="max-w-5xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+  <h2 class="text-2xl font-bold text-blue-900 mb-6 text-center">Schedules History</h2>
+
+  <!-- Messages -->
+  <div *ngIf="isLoading" class="text-center text-blue-600 font-medium">Loading...</div>
+  <div *ngIf="errorMessage" class="bg-red-100 text-red-700 p-3 rounded-lg mb-4">{{ errorMessage }}</div>
+  <div *ngIf="successMessage" class="bg-green-100 text-green-700 p-3 rounded-lg mb-4">{{ successMessage }}</div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto" *ngIf="appointments.length > 0">
+    <table class="w-full border border-gray-200 text-sm text-gray-700 rounded-lg overflow-hidden">
+      <thead class="bg-gray-100 text-gray-900">
+        <tr>
+          <th class="px-4 py-3 border">Doctor</th>
+          <th class="px-4 py-3 border">Department</th>
+          <th class="px-4 py-3 border">Day</th>
+          <th class="px-4 py-3 border">Date</th>
+          <th class="px-4 py-3 border">Start Time</th>
+          <th class="px-4 py-3 border">End Time</th>
+          <th class="px-4 py-3 border">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let appt of appointments">
+          <tr class="hover:bg-gray-50 transition">
+            <td class="px-4 py-2 border">{{ appt.first_name }} {{ appt.last_name }}</td>
+            <td class="px-4 py-2 border">{{ appt.department }}</td>
+            <td class="px-4 py-2 border">{{ appt.day }}</td>
+            <td class="px-4 py-2 border">{{ appt.date }}</td>
+            <td class="px-4 py-2 border">{{ appt.start_time }}</td>
+            <td class="px-4 py-2 border">{{ appt.end_time }}</td>
+            <td class="px-4 py-2 border flex gap-2 justify-center">
+              <button class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                (click)="editAppointment(appt)">
+                Edit
+              </button>
+              <button class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+                (click)="deleteAppointment(appt.id)">
+                Delete
+              </button>
+            </td>
+          </tr>
+          <!-- Edit Form for this specific appointment -->
+          <tr *ngIf="selectedAppointment && selectedAppointment.id === appt.id" class="bg-gray-50">
+            <td colspan="7" class="px-6 py-4 border">
+              <div class="p-4 border rounded-lg bg-white">
+                <h3 class="text-lg font-semibold text-blue-800 mb-4">Edit Schedule</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <label class="flex flex-col">
+                    <span class="text-sm font-medium text-gray-700 mb-1">Day</span>
+                    <input [(ngModel)]="selectedAppointment.day"
+                      class="px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500" />
+                  </label>
+
+                  <label class="flex flex-col">
+                    <span class="text-sm font-medium text-gray-700 mb-1">Start Time</span>
+                    <input type="time" [(ngModel)]="selectedAppointment.start_time"
+                      class="px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500" />
+                  </label>
+
+                  <label class="flex flex-col">
+                    <span class="text-sm font-medium text-gray-700 mb-1">End Time</span>
+                    <input type="time" [(ngModel)]="selectedAppointment.end_time"
+                      class="px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500" />
+                  </label>
+
+                  <label class="flex flex-col">
+                    <span class="text-sm font-medium text-gray-700 mb-1">Department</span>
+                    <input [(ngModel)]="selectedAppointment.department"
+                      class="px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500" />
+                  </label>
+                </div>
+
+                <div class="flex gap-3 mt-6">
+                  <button class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+                    (click)="updateAppointment()">
+                    💾 Save Changes
+                  </button>
+                  <button class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition"
+                    (click)="selectedAppointment = null">
+                    ✖ Cancel
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- No records -->
+  <div *ngIf="appointments.length === 0 && !isLoading" class="text-center text-gray-500 mt-4">
+    No appointment history available.
+  </div>
+</div>
