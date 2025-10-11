@@ -14,46 +14,49 @@ if (!isset($pdo)) {
 }
 
 try {
-    // SQL query to fetch the test results from the database, including doctor and patient information
+    // SQL query to fetch patients from the database
     $stmt = $pdo->prepare("
-        SELECT 
-            lab.id, 
-            lab.name, 
-            p.first_name AS patient_first_name, 
-            p.last_name AS patient_last_name, 
-            d.first_name AS doctor_first_name, 
-            d.last_name AS doctor_last_name, 
-            lab.date, 
-            lab.status, 
-            lab.type
-        FROM laboratory_tests lab
-        LEFT JOIN patients p ON lab.patient_id = p.id
-        LEFT JOIN doctors d ON lab.doctor = d.doctor_id
+        SELECT
+            id,
+            first_name,
+            last_name,
+            ghana_card_number,
+            date_of_birth,
+            gender,
+            blood_group,
+            phone_number,
+            email,
+            residential_address,
+            emergency_name,
+            emergency_phone,
+            created_at
+        FROM patients
+        ORDER BY created_at DESC
     ");
 
     // Execute the query
     $stmt->execute();
 
     // Fetch all the results
-    $testResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $patients = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Debug: Check if any results were fetched
-    error_log("Fetched test results: " . json_encode($testResults));
+    error_log("Fetched patients: " . json_encode($patients));
 
     // Check if any results were fetched
-    if ($testResults) {
+    if ($patients) {
         // Return the results in JSON format
-        echo json_encode(["success" => true, "testResults" => $testResults]);
+        echo json_encode(["success" => true, "patients" => $patients]);
     } else {
-        // No test results found
-        echo json_encode(["success" => true, "testResults" => []]);
+        // No patients found
+        echo json_encode(["success" => true, "patients" => []]);
     }
 
 } catch (PDOException $e) {
     // Log the error for debugging purposes (optional)
-    error_log("Error fetching test results: " . $e->getMessage());
+    error_log("Error fetching patients: " . $e->getMessage());
 
     // Return an error message in JSON format
-    echo json_encode(["success" => false, "message" => "❌ Error fetching test results: " . $e->getMessage()]);
+    echo json_encode(["success" => false, "message" => "❌ Error fetching patients: " . $e->getMessage()]);
 }
 ?>

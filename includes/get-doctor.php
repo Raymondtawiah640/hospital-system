@@ -4,7 +4,7 @@ require_once 'db_connect.php'; // Include the database connection file
 header('Content-Type: application/json');
 
 // Fetch all doctors from the database, including doctor_id
-$doctorStmt = $pdo->prepare("SELECT id, doctor_id, first_name, last_name FROM doctors");
+$doctorStmt = $pdo->prepare("SELECT id, doctor_id, first_name, last_name, specialization, department FROM doctors");
 $doctorStmt->execute();
 $doctors = $doctorStmt->fetchAll(PDO::FETCH_ASSOC);  // Fetch data as an associative array
 

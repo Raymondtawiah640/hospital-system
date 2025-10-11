@@ -1,0 +1,20 @@
+/* Hide footer when printing */
+@media print {
+  footer {
+    display: none !important;
+  }
+
+  .bg-blue-900 {
+    display: none !important;
+  }
+
+  /* Target footer by class combination */
+  footer.bg-blue-900 {
+    display: none !important;
+  }
+
+  /* Hide all footer elements */
+  footer * {
+    display: none !important;
+  }
+}

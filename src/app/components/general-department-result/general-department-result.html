@@ -1,0 +1,291 @@
+<div class="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-3xl font-bold text-blue-900">Consultation Results</h2>
+    <button (click)="loadConsultations()"
+            [disabled]="loading"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+      <span *ngIf="loading">Refreshing...</span>
+      <span *ngIf="!loading">Refresh</span>
+    </button>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading && consultations.length === 0" class="text-center py-8">
+    <div class="loading-spinner"></div>
+    <p class="mt-2 text-gray-600">Loading consultations...</p>
+  </div>
+
+  <!-- Filters -->
+  <div *ngIf="consultations.length > 0" class="filters-section p-4 rounded-lg mb-6">
+    <div class="filter-grid">
+      <!-- Search -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+        <input type="text"
+               [(ngModel)]="searchTerm"
+               (input)="applyFilters()"
+               placeholder="Patient, diagnosis, doctor..."
+               class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+
+      <!-- Doctor Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Doctor</label>
+        <select [(ngModel)]="selectedDoctor"
+                (change)="applyFilters()"
+                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <option value="">All Doctors</option>
+          <option *ngFor="let doctor of doctors" [value]="doctor">{{ doctor }}</option>
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+        <select [(ngModel)]="selectedStatus"
+                (change)="applyFilters()"
+                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <option value="">All Status</option>
+          <option value="completed">Completed</option>
+          <option value="pending">Pending</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <!-- Clear Filters -->
+      <div class="flex items-end">
+        <button (click)="clearFilters()"
+                class="w-full px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+          Clear Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Summary -->
+  <div *ngIf="consultations.length > 0" class="mb-4">
+    <p class="text-gray-600">
+      Showing {{ filteredConsultations.length }} of {{ consultations.length }} consultations
+    </p>
+  </div>
+
+  <!-- No Results -->
+  <div *ngIf="!loading && consultations.length === 0" class="empty-state">
+    <div class="empty-icon text-gray-400 mb-4">
+      <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">No consultations found</h3>
+    <p class="text-gray-600">Start by creating consultations in the General Department form.</p>
+  </div>
+
+  <!-- Consultation Cards -->
+  <div *ngIf="filteredConsultations.length > 0" class="space-y-6">
+    <div *ngFor="let consultation of filteredConsultations; trackBy: trackByConsultationId"
+         class="consultation-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
+
+      <!-- Card Header -->
+      <div class="card-header px-6 py-4 border-b border-gray-200 rounded-t-lg">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-white">
+              {{ consultation.patient_name }}
+            </h3>
+            <p class="text-sm text-blue-100">
+              Consultation #{{ consultation.id }} • {{ formatDate(consultation.consultation_date) }}
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button (click)="editConsultation(consultation)"
+                    class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
+              Edit
+            </button>
+            <button (click)="deleteConsultation(consultation)"
+                    class="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700">
+              Delete
+            </button>
+            <span [class]="getStatusClass(consultation.status)"
+                  class="status-badge">
+              {{ consultation.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Content -->
+      <div class="p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <!-- Left Column -->
+          <div class="space-y-4">
+            <!-- Patient Information -->
+            <div class="info-section">
+              <h4 class="font-semibold text-gray-900 mb-2">Patient Information</h4>
+              <div class="info-grid text-sm">
+                <div><strong>Gender:</strong> {{ consultation.patient_gender || 'N/A' }}</div>
+                <div><strong>Phone:</strong> {{ consultation.patient_phone || 'N/A' }}</div>
+                <div><strong>Email:</strong> {{ consultation.patient_email || 'N/A' }}</div>
+                <div><strong>Address:</strong> {{ consultation.patient_address || 'N/A' }}</div>
+              </div>
+            </div>
+
+            <!-- Doctor Information -->
+            <div class="info-section" style="background: rgba(34, 197, 94, 0.05); border-left-color: #22c55e;">
+              <h4 class="font-semibold text-gray-900 mb-2">Consulting Doctor</h4>
+              <p class="text-sm">
+                <strong>{{ consultation.doctor_name || 'Not assigned' }}</strong>
+                <span *ngIf="consultation.doctor_specialization"> • {{ consultation.doctor_specialization }}</span>
+                <span *ngIf="!consultation.doctor_specialization && consultation.doctor_department"> • {{ consultation.doctor_department }}</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div class="space-y-4">
+            <!-- Diagnosis -->
+            <div class="info-section" style="background: rgba(239, 68, 68, 0.05); border-left-color: #ef4444;">
+              <h4 class="font-semibold text-gray-900 mb-2">Diagnosis</h4>
+              <p class="text-sm">{{ consultation.diagnosis || 'Not specified' }}</p>
+            </div>
+
+            <!-- Treatment Plan -->
+            <div *ngIf="consultation.treatment_plan" class="info-section" style="background: rgba(147, 51, 234, 0.05); border-left-color: #9333ea;">
+              <h4 class="font-semibold text-gray-900 mb-2">Treatment Plan</h4>
+              <p class="text-sm">{{ consultation.treatment_plan }}</p>
+            </div>
+
+            <!-- Symptoms & Conditions -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Symptoms -->
+              <div *ngIf="consultation.symptoms && consultation.symptoms.length > 0">
+                <h4 class="font-semibold text-gray-900 mb-2">Symptoms</h4>
+                <div style="background: rgba(245, 158, 11, 0.05); border-left: 4px solid #f59e0b; border-radius: 8px; padding: 0.75rem;">
+                  <div class="flex flex-wrap gap-1">
+                    <span *ngFor="let symptom of consultation.symptoms" class="symptom-tag">
+                      {{ symptom }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Conditions -->
+              <div *ngIf="consultation.conditions && consultation.conditions.length > 0">
+                <h4 class="font-semibold text-gray-900 mb-2">Conditions</h4>
+                <div style="background: rgba(249, 115, 22, 0.05); border-left: 4px solid #f97316; border-radius: 8px; padding: 0.75rem;">
+                  <div class="flex flex-wrap gap-1">
+                    <span *ngFor="let condition of consultation.conditions" class="condition-tag">
+                      {{ condition }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          
+            <!-- Edit Modal -->
+            <div *ngIf="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <!-- Modal Header -->
+                <div class="px-6 py-4 border-b border-gray-200">
+                  <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-900">
+                      Edit Consultation #{{ editingConsultation?.id }}
+                    </h3>
+                    <button (click)="closeEditModal()"
+                            class="text-gray-400 hover:text-gray-600">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </div>
+                  <p class="text-sm text-gray-600 mt-1">
+                    Patient: {{ editingConsultation?.patient_name }}
+                  </p>
+                </div>
+          
+                <!-- Modal Body -->
+                <div class="p-6">
+                  <div class="space-y-4">
+                    <!-- Diagnosis -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Diagnosis</label>
+                      <textarea [(ngModel)]="editForm.diagnosis"
+                                rows="3"
+                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                placeholder="Enter diagnosis..."></textarea>
+                    </div>
+          
+                    <!-- Treatment Plan -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Treatment Plan</label>
+                      <textarea [(ngModel)]="editForm.treatment_plan"
+                                rows="3"
+                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                placeholder="Enter treatment plan..."></textarea>
+                    </div>
+          
+                    <!-- Status -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                      <select [(ngModel)]="editForm.status"
+                              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="completed">Completed</option>
+                        <option value="pending">Pending</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
+          
+                    <!-- Notes -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                      <textarea [(ngModel)]="editForm.notes"
+                                rows="4"
+                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                placeholder="Enter consultation notes..."></textarea>
+                    </div>
+                  </div>
+                </div>
+          
+                <!-- Modal Footer -->
+                <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+                  <button (click)="closeEditModal()"
+                          class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                    Cancel
+                  </button>
+                  <button (click)="saveConsultationEdit()"
+                          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
+           </div>
+        </div>
+
+        <!-- Notes -->
+        <div *ngIf="consultation.notes" class="mt-4">
+          <h4 class="font-semibold text-gray-900 mb-2">Notes</h4>
+          <div class="info-section">
+            <p class="text-sm text-gray-700 whitespace-pre-line">{{ consultation.notes }}</p>
+          </div>
+        </div>
+
+        <!-- Follow-up Date -->
+        <div *ngIf="consultation.follow_up_date" class="mt-4">
+          <div class="info-section" style="background: rgba(59, 130, 246, 0.05); border-left-color: #3b82f6;">
+            <p class="text-sm">
+              <strong>Follow-up Date:</strong> {{ formatDate(consultation.follow_up_date) }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

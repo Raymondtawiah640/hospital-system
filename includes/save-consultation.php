@@ -10,8 +10,13 @@ try {
     // Get the posted data
     $input = json_decode(file_get_contents('php://input'), true);
 
+    // Debug: Log what we received
+    error_log('=== BACKEND CONSULTATION DEBUG ===');
+    error_log('Raw input received: ' . print_r($input, true));
+    error_log('Doctor ID received: ' . ($input['doctor_id'] ?? 'NOT SET'));
+
     // Validate required fields
-    $requiredFields = ['patient_id', 'doctor_id', 'symptoms', 'conditions', 'diagnosis'];
+    $requiredFields = ['patient_id', 'diagnosis'];
     foreach ($requiredFields as $field) {
         if (!isset($input[$field]) || empty($input[$field])) {
             echo json_encode([
@@ -22,15 +27,61 @@ try {
         }
     }
 
+    // Optional fields - provide defaults if not set
     $patientId = (int)$input['patient_id'];
-    $doctorId = (int)$input['doctor_id'];
-    $symptoms = $input['symptoms']; // Array of symptom IDs
-    $conditions = $input['conditions']; // Array of condition IDs
+    $doctorIdInput = isset($input['doctor_id']) ? $input['doctor_id'] : null; // Keep original doctor_id for validation
+
+    // If doctor_id is provided, validate it exists in doctors table and find corresponding staff.id
+    $actualDoctorId = null;
+    if ($doctorIdInput !== null) {
+        // First check if the doctor_id exists in the doctors table
+        $doctorCheckQuery = $pdo->prepare("SELECT id, first_name, last_name FROM doctors WHERE doctor_id = ?");
+        $doctorCheckQuery->execute([$doctorIdInput]);
+        $doctorResult = $doctorCheckQuery->fetch();
+
+        if (!$doctorResult) {
+            // Get available doctors for debugging
+            $doctorsQuery = $pdo->prepare("SELECT doctor_id, first_name, last_name, specialization FROM doctors ORDER BY doctor_id");
+            $doctorsQuery->execute();
+            $availableDoctors = $doctorsQuery->fetchAll(PDO::FETCH_ASSOC);
+
+            echo json_encode([
+                'success' => false,
+                'message' => 'Doctor not found. The doctor_id "' . $doctorIdInput . '" does not exist in the doctors table.',
+                'debug' => [
+                    'requested_doctor_id' => $doctorIdInput,
+                    'available_doctor_ids' => array_column($availableDoctors, 'doctor_id'),
+                    'doctors_count' => count($availableDoctors)
+                ]
+            ]);
+            exit;
+        }
+
+        // Doctor exists, now try to find corresponding staff record
+        $staffIdQuery = $pdo->prepare("SELECT id FROM staff WHERE staff_id = ?");
+        $staffIdQuery->execute([$doctorIdInput]);
+        $staffResult = $staffIdQuery->fetch();
+        $actualDoctorId = $staffResult ? (int)$staffResult['id'] : null;
+
+        if (!$actualDoctorId) {
+            // Doctor exists in doctors table but no staff record found
+            // For now, we'll proceed without a doctor_id rather than using incorrect fallback
+            error_log("Doctor '$doctorIdInput' found in doctors table but no matching staff record. Saving consultation without doctor link.");
+
+            // Store doctor information in notes or handle differently
+            // For now, we'll save with null doctor_id but could enhance this later
+        } else {
+            error_log("Mapped doctor_id '$doctorIdInput' to staff.id: $actualDoctorId");
+        }
+    }
+    $symptoms = isset($input['symptoms']) ? $input['symptoms'] : [];
+    $conditions = isset($input['conditions']) ? $input['conditions'] : [];
     $diagnosis = trim($input['diagnosis']);
     $treatmentPlan = isset($input['treatment_plan']) ? trim($input['treatment_plan']) : '';
     $notes = isset($input['notes']) ? trim($input['notes']) : '';
     $followUpDate = isset($input['follow_up_date']) ? $input['follow_up_date'] : null;
     $status = isset($input['status']) ? trim($input['status']) : 'completed';
+
 
     // Validate patient exists
     $patientCheck = $pdo->prepare("SELECT id FROM patients WHERE id = ?");
@@ -43,16 +94,6 @@ try {
         exit;
     }
 
-    // Validate doctor exists
-    $doctorCheck = $pdo->prepare("SELECT id FROM staff WHERE id = ? AND role = 'doctor'");
-    $doctorCheck->execute([$doctorId]);
-    if (!$doctorCheck->fetch()) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Doctor not found'
-        ]);
-        exit;
-    }
 
     // Validate symptoms exist
     if (!empty($symptoms)) {
@@ -96,7 +137,7 @@ try {
     ");
 
     $insertResult = $insertStmt->execute([
-        $patientId, $doctorId, $diagnosis, $treatmentPlan,
+        $patientId, $actualDoctorId, $diagnosis, $treatmentPlan,
         $notes, $followUpDate, $status
     ]);
 
@@ -135,11 +176,15 @@ try {
     $consultationQuery = $pdo->prepare("
         SELECT
             c.*,
-            p.first_name as patient_first_name, p.last_name as patient_last_name,
-            s.first_name as doctor_first_name, s.last_name as doctor_last_name
+            CONCAT(p.first_name, ' ', p.last_name) as patient_name,
+            COALESCE(s.full_name, CONCAT(d.first_name, ' ', d.last_name)) as doctor_name,
+            COALESCE(s.department, d.department) as doctor_department,
+            s.staff_id as doctor_staff_id,
+            d.specialization as doctor_specialization
         FROM consultations c
         JOIN patients p ON c.patient_id = p.id
-        JOIN staff s ON c.doctor_id = s.id
+        LEFT JOIN staff s ON c.doctor_id = s.id
+        LEFT JOIN doctors d ON s.staff_id = d.doctor_id
         WHERE c.id = ?
     ");
     $consultationQuery->execute([$consultationId]);
@@ -169,9 +214,9 @@ try {
         'consultation' => [
             'id' => $consultation['id'],
             'patient_id' => $consultation['patient_id'],
-            'patient_name' => $consultation['patient_first_name'] . ' ' . $consultation['patient_last_name'],
+            'patient_name' => $consultation['patient_name'],
             'doctor_id' => $consultation['doctor_id'],
-            'doctor_name' => $consultation['doctor_first_name'] . ' ' . $consultation['doctor_last_name'],
+            'doctor_name' => $consultation['doctor_name'] ? $consultation['doctor_name'] . ' - ' . ($consultation['doctor_department'] || 'General') : 'Not assigned',
             'consultation_date' => $consultation['consultation_date'],
             'diagnosis' => $consultation['diagnosis'],
             'treatment_plan' => $consultation['treatment_plan'],

@@ -27,6 +27,7 @@ export class GeneralDepartment implements OnInit {
    address: '',
 
    // Consultation details
+   selectedDoctorId: '',
    chiefComplaint: '',
    historyOfPresentIllness: '',
    pastMedicalHistory: '',
@@ -60,12 +61,14 @@ export class GeneralDepartment implements OnInit {
    // Consultation metadata
    consultationDate: '',
    consultingDoctor: '',
-   urgency: 'routine'
+   urgency: 'routine',
+   status: 'completed'
  };
 
  // API data
  patients: any[] = [];
  medicines: any[] = [];
+ doctors: any[] = [];
 
  // Only symptoms from API
  symptoms: any[] = [];
@@ -126,6 +129,7 @@ export class GeneralDepartment implements OnInit {
    this.loadPatients();
    this.loadMedicines();
    this.loadSymptoms();
+   this.loadDoctors();
 
    // Debug: Log initial diagnosis field state
    console.log('Initial diagnosis field state:', {
@@ -140,11 +144,28 @@ export class GeneralDepartment implements OnInit {
    return 'Dr. General Physician';
  }
 
- // Get display value for fields (show "none" for empty fields)
+ // Get selected doctor name for display
+ getSelectedDoctorName(): string {
+   if (!this.consultationData.selectedDoctorId) {
+     return '';
+   }
+   const selectedDoctor = this.doctors.find(doctor => doctor.doctor_id === this.consultationData.selectedDoctorId);
+   return selectedDoctor ? `${selectedDoctor.first_name} ${selectedDoctor.last_name} - ${selectedDoctor.specialization || selectedDoctor.department}` : '';
+ }
+
+ // Handle doctor selection change
+ onDoctorChange() {
+   console.log('Doctor selection changed:', {
+     selectedDoctorId: this.consultationData.selectedDoctorId,
+     selectedDoctor: this.doctors.find(d => d.doctor_id === this.consultationData.selectedDoctorId)
+   });
+ }
+
+ // Get display value for fields (show "Not specified" for empty fields in print)
  getDisplayValue(fieldName: string): string {
    const value = this.consultationData[fieldName as keyof typeof this.consultationData];
-   if (value === null || value === undefined || String(value).trim() === '') {
-     return 'none';
+   if (value === null || value === undefined || String(value).trim() === '' || String(value).trim().toLowerCase() === 'none') {
+     return 'Not specified';
    }
    return String(value);
  }
@@ -196,7 +217,14 @@ export class GeneralDepartment implements OnInit {
    if (this.consultationData.weight && this.consultationData.height) {
      const heightM = parseFloat(this.consultationData.height) / 100;
      const weight = parseFloat(this.consultationData.weight);
-     return parseFloat((weight / (heightM * heightM)).toFixed(1));
+
+     // Validate inputs
+     if (heightM > 0 && weight > 0 && heightM < 3 && weight < 1000) {
+       const bmi = weight / (heightM * heightM);
+       if (bmi > 0 && bmi < 100) { // Reasonable BMI range
+         return parseFloat(bmi.toFixed(1));
+       }
+     }
    }
    return 0;
  }
@@ -210,7 +238,29 @@ export class GeneralDepartment implements OnInit {
    if (this.isLoggedIn) {
      const apiUrl = 'https://kilnenterprise.com/presbyterian-hospital/save-consultation.php';
 
-     this.http.post(apiUrl, this.consultationData)
+     // Map frontend field names to backend expected field names
+     const backendData = {
+       patient_id: parseInt(this.consultationData.patientId), // Convert to integer
+       doctor_id: this.consultationData.selectedDoctorId || null, // Selected doctor (now sends doctor_id string directly)
+       symptoms: [], // Will be empty for now - can be enhanced later
+       conditions: [], // Will be empty for now - can be enhanced later
+       diagnosis: this.consultationData.diagnosis && this.consultationData.diagnosis.trim() !== '' && this.consultationData.diagnosis.trim().toLowerCase() !== 'none' ? this.consultationData.diagnosis.trim() : null,
+       treatment_plan: this.consultationData.treatmentPlan || 'As needed',
+       notes: `Chief Complaint: ${this.consultationData.chiefComplaint}\n\nHistory of Present Illness: ${this.consultationData.historyOfPresentIllness}\n\nPast Medical History: ${this.consultationData.pastMedicalHistory}\n\nCurrent Medications: ${this.consultationData.currentMedications}\n\nAllergies: ${this.consultationData.allergies}${this.consultationData.selectedDoctorId ? '\n\nConsulting Doctor: ' + this.getSelectedDoctorName() : ''}`,
+       follow_up_date: null,
+       status: this.consultationData.status || 'completed'
+     };
+
+     // Debug: Log what we're sending to the backend
+     console.log('=== CONSULTATION SUBMISSION DEBUG ===');
+     console.log('Selected Doctor ID:', this.consultationData.selectedDoctorId);
+     console.log('Selected Doctor ID type:', typeof this.consultationData.selectedDoctorId);
+     console.log('Parsed Doctor ID:', this.consultationData.selectedDoctorId ? parseInt(this.consultationData.selectedDoctorId) : null);
+     console.log('Available doctors:', this.doctors.map(d => ({id: d.id, name: d.first_name + ' ' + d.last_name})));
+     console.log('Backend data being sent:', backendData);
+     console.log('=====================================');
+
+     this.http.post(apiUrl, backendData)
        .subscribe({
          next: (response: any) => {
            this.isLoading = false;
@@ -230,7 +280,11 @@ export class GeneralDepartment implements OnInit {
          error: (err) => {
            this.isLoading = false;
            console.error('Error saving consultation:', err);
-           this.errorMessage = 'There was a problem saving the consultation. Please try again later.';
+           if (err.error && err.error.message) {
+             this.errorMessage = err.error.message;
+           } else {
+             this.errorMessage = 'There was a problem saving the consultation. Please try again later.';
+           }
            setTimeout(() => {
              this.errorMessage = '';
            }, 5000);
@@ -251,6 +305,7 @@ export class GeneralDepartment implements OnInit {
      phone: '',
      email: '',
      address: '',
+     selectedDoctorId: '',
      chiefComplaint: '',
      historyOfPresentIllness: '',
      pastMedicalHistory: '',
@@ -276,7 +331,8 @@ export class GeneralDepartment implements OnInit {
      referralDepartment: '',
      consultationDate: new Date().toISOString().split('T')[0],
      consultingDoctor: this.getCurrentDoctorName(),
-     urgency: 'routine'
+     urgency: 'routine',
+     status: 'completed'
    };
    // Reset all field states when form is reset
    this.initializeFieldStates();
@@ -284,7 +340,31 @@ export class GeneralDepartment implements OnInit {
 
  // Print consultation
  printConsultation() {
-   window.print();
+   // Hide any URLs that might appear in print
+   const style = document.createElement('style');
+   style.textContent = `
+     @media print {
+       * { margin: 0 !important; padding: 0 !important; }
+       @page { margin: 0.25in; }
+       @page { @bottom-left { content: "" !important; } }
+       @page { @bottom-center { content: "" !important; } }
+       @page { @bottom-right { content: "" !important; } }
+       html::after, body::after { content: "" !important; display: none !important; }
+       *[class*="url"], *[id*="url"] { display: none !important; }
+       footer, .footer { display: none !important; }
+     }
+   `;
+   document.head.appendChild(style);
+
+   // Small delay to ensure styles are applied
+   setTimeout(() => {
+     window.print();
+
+     // Clean up the added styles after printing
+     setTimeout(() => {
+       document.head.removeChild(style);
+     }, 1000);
+   }, 100);
  }
 
  // Initialize field states
@@ -314,7 +394,40 @@ export class GeneralDepartment implements OnInit {
  // Check if field is filled (not empty)
  isFieldFilled(fieldName: string): boolean {
    const value = this.consultationData[fieldName as keyof typeof this.consultationData];
-   return value !== null && value !== undefined && String(value).trim() !== '';
+   const stringValue = String(value || '').trim();
+
+   // Special handling for age field - must be a valid number
+   if (fieldName === 'age') {
+     const ageNum = parseInt(stringValue);
+     const isValidAge = value !== null && value !== undefined && stringValue !== '' && !isNaN(ageNum) && ageNum > 0 && ageNum <= 150;
+     console.log(`isFieldFilled('age') - Value: "${value}", String value: "${stringValue}", Parsed: ${ageNum}, Is valid: ${isValidAge}`);
+     return isValidAge;
+   }
+
+   // Special handling for patientId field - must be numeric
+   if (fieldName === 'patientId') {
+     const idNum = parseInt(stringValue);
+     const isValidId = value !== null && value !== undefined && stringValue !== '' && !isNaN(idNum) && idNum > 0;
+     console.log(`isFieldFilled('patientId') - Value: "${value}", String value: "${stringValue}", Parsed: ${idNum}, Is valid: ${isValidId}`);
+     return isValidId;
+   }
+
+   // Special handling for gender field - must be valid option
+   if (fieldName === 'gender') {
+     const validGenders = ['Male', 'Female', 'Other'];
+     const isValidGender = value !== null && value !== undefined && stringValue !== '' && validGenders.includes(stringValue);
+     console.log(`isFieldFilled('gender') - Value: "${value}", String value: "${stringValue}", Is valid: ${isValidGender}`);
+     return isValidGender;
+   }
+
+   const isFilled = value !== null && value !== undefined && stringValue !== '' && stringValue.toLowerCase() !== 'none';
+
+   // Debug logging for diagnosis field
+   if (fieldName === 'diagnosis') {
+     console.log(`isFieldFilled('${fieldName}') - Value: "${value}", String value: "${stringValue}", Is filled: ${isFilled}`);
+   }
+
+   return isFilled;
  }
 
  // Update field state when input changes
@@ -361,12 +474,42 @@ export class GeneralDepartment implements OnInit {
  // Check if all required fields across all sections are filled
  areAllRequiredFieldsFilled(): boolean {
    const allSections = Object.keys(this.requiredFieldsBySection);
-   return allSections.every(section => this.areRequiredFieldsFilled(section));
+   const result = allSections.every(section => this.areRequiredFieldsFilled(section));
+
+   // Debug logging to see which sections are failing
+   if (!result) {
+     console.log('=== FORM VALIDATION DEBUG ===');
+     allSections.forEach(section => {
+       const requiredFields = this.requiredFieldsBySection[section as keyof typeof this.requiredFieldsBySection] || [];
+       const sectionValid = this.areRequiredFieldsFilled(section);
+       console.log(`Section '${section}' valid: ${sectionValid}`);
+       if (!sectionValid) {
+         requiredFields.forEach(field => {
+           const fieldFilled = this.isFieldFilled(field);
+           console.log(`  Field '${field}': "${this.consultationData[field as keyof typeof this.consultationData]}" - Filled: ${fieldFilled}`);
+         });
+       }
+     });
+     console.log('=============================');
+   }
+
+   return result;
  }
 
  // Check if form is valid for saving/printing
  isFormValid(): boolean {
-   return this.areAllRequiredFieldsFilled();
+   const formValid = this.areAllRequiredFieldsFilled();
+   const patientIdValid = !!this.consultationData.patientId;
+   const isLoading = this.isLoading;
+
+   console.log('=== FORM VALID CHECK ===');
+   console.log('Form valid (all required fields):', formValid);
+   console.log('Patient ID valid:', patientIdValid, 'Value:', this.consultationData.patientId);
+   console.log('Is loading:', isLoading);
+   console.log('Final result:', !isLoading && formValid && patientIdValid);
+   console.log('========================');
+
+   return !isLoading && formValid && patientIdValid;
  }
 
  // API Integration Methods
@@ -412,6 +555,33 @@ export class GeneralDepartment implements OnInit {
        error: (err) => {
          console.error('Error loading medicines:', err);
          this.medicines = [];
+       }
+     });
+ }
+
+ // Load doctors from API
+ loadDoctors() {
+   console.log('Loading doctors from API...');
+   this.http.get('https://kilnenterprise.com/presbyterian-hospital/get-doctor.php')
+     .subscribe({
+       next: (response: any) => {
+         console.log('Raw doctors API response:', response);
+
+         // Handle both array response and object response with doctors property
+         if (Array.isArray(response)) {
+           this.doctors = response;
+         } else if (response && response.doctors) {
+           this.doctors = response.doctors;
+         } else {
+           this.doctors = [];
+         }
+
+         console.log('Processed doctors array:', this.doctors);
+         console.log('Total doctors loaded:', this.doctors.length);
+       },
+       error: (err) => {
+         console.error('Error loading doctors:', err);
+         this.doctors = [];
        }
      });
  }
@@ -496,30 +666,68 @@ export class GeneralDepartment implements OnInit {
 
  // Select patient from search results
  selectPatient(patient: any) {
-   // Map API fields to frontend fields
-   this.consultationData.patientId = patient.ghana_card_number || patient.id || '';
-   this.consultationData.patientName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim();
-   this.consultationData.age = this.calculateAge(patient.date_of_birth) || '';
-   this.consultationData.gender = patient.gender || '';
+   console.log('=== SELECTING PATIENT ===');
+   console.log('Patient data:', patient);
+   console.log('Patient ID:', patient.id, 'Type:', typeof patient.id);
+
+   // Map API fields to frontend fields - use ID as patient_id, Ghana card as display
+   const patientId = patient.id ? patient.id.toString() : '';
+   const patientName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim();
+   const age = this.calculateAge(patient.date_of_birth) || '';
+
+   // Handle gender with fallback to valid options
+   let gender = patient.gender || '';
+   if (gender && !['Male', 'Female', 'Other'].includes(gender)) {
+     console.log('Invalid gender value:', gender, 'setting to empty');
+     gender = '';
+   }
+
+   // Set values
+   this.consultationData.patientId = patientId;
+   this.consultationData.patientName = patientName;
+   this.consultationData.age = age;
+   this.consultationData.gender = gender;
    this.consultationData.phone = patient.phone_number || '';
    this.consultationData.email = patient.email || '';
    this.consultationData.address = patient.residential_address || '';
 
-   // Update field states for patient info
-   this.onFieldChange('patientId');
-   this.onFieldChange('patientName');
-   this.onFieldChange('age');
-   this.onFieldChange('gender');
-   this.onFieldChange('phone');
-   this.onFieldChange('email');
-   this.onFieldChange('address');
+   console.log('After selection:');
+   console.log('- Patient ID:', this.consultationData.patientId);
+   console.log('- Patient Name:', this.consultationData.patientName);
+   console.log('- Age:', this.consultationData.age);
+   console.log('- Gender:', this.consultationData.gender);
+
+   // Force field validation update
+   setTimeout(() => {
+     this.onFieldChange('patientId');
+     this.onFieldChange('patientName');
+     this.onFieldChange('age');
+     this.onFieldChange('gender');
+     this.onFieldChange('phone');
+     this.onFieldChange('email');
+     this.onFieldChange('address');
+
+     console.log('Field states after selection:', {
+       patientId: this.fieldStates['patientId'],
+       patientName: this.fieldStates['patientName'],
+       age: this.fieldStates['age'],
+       gender: this.fieldStates['gender']
+     });
+
+     console.log('Form validation after patient selection:', this.isFormValid());
+   }, 100);
 
    this.showPatientSearch = false;
  }
 
  // Calculate age from date of birth
  calculateAge(dateOfBirth: string): string {
-   if (!dateOfBirth) return '';
+   console.log('Calculating age for DOB:', dateOfBirth);
+
+   if (!dateOfBirth) {
+     console.log('No date of birth provided');
+     return '';
+   }
 
    const birthDate = new Date(dateOfBirth);
    const today = new Date();
@@ -530,7 +738,9 @@ export class GeneralDepartment implements OnInit {
      age--;
    }
 
-   return age.toString();
+   const result = age.toString();
+   console.log('Calculated age:', result);
+   return result;
  }
 
  // Debug method to check diagnosis field state (can be called from console)
@@ -550,6 +760,44 @@ export class GeneralDepartment implements OnInit {
      class: this.getAsteriskClass('diagnosis'),
      sectionValid: this.isSectionValid('treatment')
    };
+ }
+
+ // Debug method to check overall form validation (can be called from console)
+ debugFormValidation() {
+   console.log('=== FORM VALIDATION DEBUG ===');
+   console.log('Patient ID:', `"${this.consultationData.patientId}"`);
+   console.log('Patient Name:', `"${this.consultationData.patientName}"`);
+   console.log('Age:', `"${this.consultationData.age}"`);
+   console.log('Gender:', `"${this.consultationData.gender}"`);
+   console.log('Chief Complaint:', `"${this.consultationData.chiefComplaint}"`);
+   console.log('Diagnosis:', `"${this.consultationData.diagnosis}"`);
+   console.log('Form valid:', this.isFormValid());
+   console.log('All required fields filled:', this.areAllRequiredFieldsFilled());
+   console.log('===========================');
+   return {
+     patientId: this.consultationData.patientId,
+     patientName: this.consultationData.patientName,
+     age: this.consultationData.age,
+     gender: this.consultationData.gender,
+     chiefComplaint: this.consultationData.chiefComplaint,
+     diagnosis: this.consultationData.diagnosis,
+     formValid: this.isFormValid(),
+     allRequiredFilled: this.areAllRequiredFieldsFilled()
+   };
+ }
+
+ // Manual validation trigger (can be called from console)
+ triggerValidation() {
+   console.log('=== MANUAL VALIDATION TRIGGER ===');
+   this.onFieldChange('patientId');
+   this.onFieldChange('patientName');
+   this.onFieldChange('age');
+   this.onFieldChange('gender');
+   this.onFieldChange('chiefComplaint');
+   this.onFieldChange('diagnosis');
+   console.log('Validation triggered for all required fields');
+   console.log('Form should now be:', this.isFormValid() ? 'VALID' : 'INVALID');
+   console.log('=============================');
  }
 
 }

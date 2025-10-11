@@ -339,97 +339,78 @@
   accent-color: #3b82f6;
 }
 
-/* Print Styles */
+/* Print Styles - Consolidated */
 @media print {
-  .no-print {
+  /* Hide all UI elements */
+  .no-print, input, textarea, select, button, .btn, footer, .footer, [role="contentinfo"], app-navbar, nav, .bg-blue-700, [class*="nav"], .shadow-md, .z-50 {
     display: none !important;
   }
 
-  /* Hide all input elements and interactive components */
-  input, textarea, select, button, .btn {
-    display: none !important;
-  }
-
-  /* Show data in clean format */
-  .form-section {
-    box-shadow: none;
-    border: 1px solid #ccc;
-    page-break-inside: avoid;
-    margin-bottom: 1rem;
-  }
-
-  .section-title {
-    color: #000 !important;
-    border-bottom: 2px solid #000;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-  }
-
-  .form-label {
-    font-weight: bold;
-    color: #000;
-    margin-bottom: 0.25rem;
-    display: block;
-  }
-
-  /* Show field values in a clean text format */
-  .form-group {
-    margin-bottom: 0.75rem;
-    display: block;
-  }
-
-  /* For empty fields, show "none" */
-  .form-group:empty::after {
-    content: "none";
-    color: #666;
-    font-style: italic;
-  }
-
-  /* Ensure grid layouts work for print */
-  .form-grid {
-    display: block;
-  }
-
-  .form-grid > * {
-    margin-bottom: 0.5rem;
-  }
-
-  /* Print-friendly colors */
-  body {
-    background: white !important;
-    color: black !important;
-  }
-
-  /* Page break controls */
-  .page-break-before {
-    page-break-before: always;
-  }
-
-  .page-break-after {
-    page-break-after: always;
-  }
-
-  /* Remove background colors and gradients */
-  .general-department-container,
-  .department-header,
-  .form-section {
-    background: white !important;
-    color: black !important;
-  }
-
-  /* Print-only elements */
-  .print-only {
-    display: none;
-  }
-}
-
-/* Show print-only elements when printing */
-@media print {
+  /* Show print-only content */
   .print-only {
     display: block !important;
   }
 
-  .no-print {
+  /* Clean print layout */
+  body {
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0.25in !important;
+  }
+
+  .form-section {
+    background: white !important;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    margin-top: 0 !important;
+    margin-bottom: 3.5rem !important;
+    padding: 2.5rem !important;
+    page-break-inside: avoid;
+  }
+
+  .section-title {
+    color: #000 !important;
+    border-bottom: 2px solid #000 !important;
+    margin-bottom: 2.5rem !important;
+    margin-top: 0 !important;
+    padding-bottom: 1.25rem !important;
+    padding-top: 1.25rem !important;
+  }
+
+  .form-label {
+    font-weight: bold !important;
+    color: #000 !important;
+    display: block !important;
+  }
+
+  .form-grid {
+    display: block !important;
+  }
+
+  /* Hide any URLs or browser content */
+  @page {
+    margin: 0.25in;
+    @bottom-left { content: "" !important; }
+    @bottom-center { content: "" !important; }
+    @bottom-right { content: "" !important; }
+    @top-left { content: "" !important; }
+    @top-center { content: "" !important; }
+    @top-right { content: "" !important; }
+  }
+
+  /* Force clean print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  a[href]:after {
+    content: "" !important;
+    display: none !important;
+  }
+
+  *[class*="url"], *[id*="url"] {
     display: none !important;
   }
 }

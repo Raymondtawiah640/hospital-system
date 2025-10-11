@@ -1,0 +1,6 @@
+/* Hide navbar when printing */
+@media print {
+  nav {
+    display: none !important;
+  }
+}

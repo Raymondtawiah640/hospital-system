@@ -234,7 +234,7 @@ export class Invoices implements OnInit, OnDestroy {
       const printContent = `
         <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; border: 2px solid #333; background: white;">
           <header style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px;">
-            <h1 style="color: #2c3e50; margin: 0; font-size: 28px;">Presbyterian Hospital</h1>
+            <h1 style="color: #2c3e50; margin: 0; font-size: 28px;">Hospital</h1>
             <p style="color: #7f8c8d; margin: 5px 0; font-size: 14px;">Quality Healthcare Services</p>
             <p style="color: #7f8c8d; margin: 0; font-size: 12px;">123 Medical Center Drive, Healthcare City</p>
           </header>
@@ -264,7 +264,7 @@ export class Invoices implements OnInit, OnDestroy {
           ${prescriptionsHtml}
 
           <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #7f8c8d;">
-            <p style="margin: 5px 0;">Thank you for choosing Presbyterian Hospital</p>
+            <p style="margin: 5px 0;">Thank you for coming!</p>
             <p style="margin: 5px 0; font-size: 12px;">For inquiries, contact us at (555) 123-4567 or info@presbyterianhospital.com</p>
             <p style="margin: 5px 0; font-size: 10px;">This is a computer-generated invoice and does not require a signature.</p>
           </footer>
