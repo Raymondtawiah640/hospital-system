@@ -23,19 +23,22 @@
       <tbody>
         <ng-container *ngFor="let appt of appointments">
           <tr class="hover:bg-gray-50 transition">
-            <td class="px-4 py-2 border">{{ appt.first_name }} {{ appt.last_name }}</td>
+            <td class="px-4 py-2 border">{{ getDoctorName(appt) }}</td>
             <td class="px-4 py-2 border">{{ appt.department }}</td>
             <td class="px-4 py-2 border">{{ appt.day }}</td>
             <td class="px-4 py-2 border">{{ appt.date }}</td>
             <td class="px-4 py-2 border">{{ appt.start_time }}</td>
             <td class="px-4 py-2 border">{{ appt.end_time }}</td>
+            <td class="px-4 py-2 border">
+              <span [ngClass]="getStatusClass(appt)">{{ getStatusText(appt) }}</span>
+            </td>
             <td class="px-4 py-2 border flex gap-2 justify-center">
               <button class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
                 (click)="editAppointment(appt)">
                 Edit
               </button>
               <button class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
-                (click)="deleteAppointment(appt.id)">
+                (click)="confirmDeleteSchedule(appt)">
                 Delete
               </button>
             </td>
@@ -93,5 +96,25 @@
   <!-- No records -->
   <div *ngIf="appointments.length === 0 && !isLoading" class="text-center text-gray-500 mt-4">
     No appointment history available.
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg p-6 w-full max-w-md">
+    <h2 class="text-xl font-bold mb-4">Confirm Delete</h2>
+    <p class="mb-4">Are you sure you want to delete this schedule? This action cannot be undone.</p>
+    <div *ngIf="scheduleToDelete" class="bg-gray-100 p-3 rounded mb-4">
+      <p><strong>Doctor:</strong> {{ getDoctorName(scheduleToDelete) }}</p>
+      <p><strong>Day:</strong> {{ scheduleToDelete.day }}</p>
+      <p><strong>Time:</strong> {{ scheduleToDelete.start_time }} - {{ scheduleToDelete.end_time }}</p>
+      <p><strong>Department:</strong> {{ scheduleToDelete.department }}</p>
+    </div>
+    <div class="flex justify-end space-x-2">
+      <button (click)="closeModals()"
+        class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancel</button>
+      <button (click)="deleteAppointment()"
+        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Delete</button>
+    </div>
   </div>
 </div>

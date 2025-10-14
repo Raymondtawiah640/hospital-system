@@ -62,7 +62,6 @@ export class Schedules implements OnInit {
         },
         error: (err) => {
           this.isLoading = false;
-          console.error('Error loading doctors:', err);
           this.errorMessage = 'There was a problem fetching doctor data.';
         }
       });
@@ -111,7 +110,6 @@ export class Schedules implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
-        console.error('Error adding schedule:', err);
         this.errorMessage = 'There was a problem with the request. Please try again later.';
       }
     });

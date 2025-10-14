@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,11 +7,12 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-shedules-history',
-  imports: [CommonModule, FormsModule],
   templateUrl: './shedules-history.html',
-  styleUrls: ['./shedules-history.css']
+  styleUrls: ['./shedules-history.css'],
+  standalone: true,
+  imports: [CommonModule, FormsModule]
 })
-export class ShedulesHistory implements OnInit {
+export class ShedulesHistory implements OnInit, OnDestroy {
   appointments: any[] = [];
   selectedAppointment: any = null;
 
@@ -22,7 +23,18 @@ export class ShedulesHistory implements OnInit {
 
   private messageTimer: any; // 🔹 Timer for clearing messages
 
+  // Modal related
+  showDeleteModal: boolean = false;
+  scheduleToDelete: any = null;
+
   constructor(private authService: AuthService, private http: HttpClient, private router: Router) {}
+
+  // Clear timer when component is destroyed
+  ngOnDestroy(): void {
+    if (this.messageTimer) {
+      clearTimeout(this.messageTimer);
+    }
+  }
 
   ngOnInit(): void {
     this.isLoggedIn = this.authService.loggedIn();
@@ -65,7 +77,6 @@ export class ShedulesHistory implements OnInit {
         },
         error: (err) => {
           this.isLoading = false;
-          console.error('Error fetching appointments:', err);
           this.showMessage('Could not load schedule history.', 'error');
         }
       });
@@ -92,30 +103,63 @@ export class ShedulesHistory implements OnInit {
           }
         },
         error: (err) => {
-          console.error('Error updating schedule:', err);
           this.showMessage('Error updating schedule.', 'error');
         }
       });
   }
 
-  // ✅ Delete appointment
-  deleteAppointment(id: number): void {
-    if (!confirm('Are you sure you want to delete this schedule?')) return;
+  // ✅ Show delete confirmation modal
+  confirmDeleteSchedule(schedule: any): void {
+    this.scheduleToDelete = schedule;
+    this.showDeleteModal = true;
+  }
 
-    this.http.delete(`https://kilnenterprise.com/presbyterian-hospital/delete-schedule.php?id=${id}`)
-      .subscribe({
-        next: (data: any) => {
-          if (data.success) {
-            this.showMessage('Schedule deleted successfully.', 'success');
-            this.loadAppointments();
-          } else {
-            this.showMessage('Failed to delete schedule.', 'error');
-          }
-        },
-        error: (err) => {
-          console.error('Error deleting schedule:', err);
-          this.showMessage('Error deleting schedule.', 'error');
+  // ✅ Delete appointment with modal confirmation
+  deleteAppointment(): void {
+    if (!this.scheduleToDelete) return;
+
+    this.http.delete('https://kilnenterprise.com/presbyterian-hospital/delete-schedule.php', {
+      params: { id: this.scheduleToDelete.id }
+    }).subscribe({
+      next: (data: any) => {
+        if (data.success) {
+          this.showMessage('Schedule deleted successfully.', 'success');
+          this.loadAppointments();
+          this.closeModals();
+        } else {
+          this.showMessage('Failed to delete schedule.', 'error');
+          this.closeModals();
         }
-      });
+      },
+      error: (err) => {
+        this.showMessage('Error deleting schedule.', 'error');
+        this.closeModals();
+      }
+    });
+  }
+
+  // ✅ Close modals
+  closeModals(): void {
+    this.showDeleteModal = false;
+    this.scheduleToDelete = null;
+  }
+
+  // ✅ Helper method to get full doctor name
+  getDoctorName(appointment: any): string {
+    return `${appointment.first_name} ${appointment.last_name}`;
+  }
+
+  // ✅ Helper method to get status class
+  getStatusClass(appointment: any): string {
+    if (appointment.is_attended) return 'text-green-600 font-semibold';
+    if (appointment.is_active) return 'text-blue-600 font-semibold';
+    return 'text-gray-600 font-semibold';
+  }
+
+  // ✅ Helper method to get status text
+  getStatusText(appointment: any): string {
+    if (appointment.is_attended) return 'Attended';
+    if (appointment.is_active) return 'Active';
+    return 'Scheduled';
   }
 }
