@@ -140,7 +140,6 @@ export class Billing implements OnInit, OnDestroy {
       },
       (error) => {
         this.isLoading = false;
-        console.error('Error fetching bills:', error);
         this.setErrorMessage('Error fetching bills.');
         // Still try to load prescriptions even if bills fail
         this.fetchPrescriptions();
@@ -164,7 +163,6 @@ export class Billing implements OnInit, OnDestroy {
         this.fetchBills();
       },
       (error) => {
-        console.error('Error loading doctors:', error);
         this.doctors = [];
         // Load bills and prescriptions even if doctors fail
         this.fetchBills();
@@ -364,30 +362,6 @@ export class Billing implements OnInit, OnDestroy {
     );
   }
 
-  deleteBill(bill: any): void {
-    this.selectedBill = bill;
-    this.showDeleteModal = true;
-  }
-
-  confirmDelete(): void {
-    const apiUrl = 'https://kilnenterprise.com/presbyterian-hospital/delete-bill.php';
-    this.http.delete<any>(apiUrl, { body: { id: this.selectedBill.id } }).subscribe(
-      (response) => {
-        if (response.success) {
-          this.fetchBills();
-          this.closeModals();
-          this.setSuccessMessage('Bill deleted successfully');
-        } else {
-          this.setErrorMessage(response.message);
-          this.closeModals();
-        }
-      },
-      (error) => {
-        this.setErrorMessage('Error deleting bill.');
-        this.closeModals();
-      }
-    );
-  }
 
   cancelForm(): void {
     this.showForm = false;
@@ -465,11 +439,11 @@ export class Billing implements OnInit, OnDestroy {
         this.http.delete<any>(apiUrl, { body: { id: med.id } }).subscribe(
           (response) => {
             if (!response.success) {
-              console.error('Failed to delete prescription:', med.id);
+              // Prescription deletion failed silently
             }
           },
           (error) => {
-            console.error('Error deleting prescription:', error);
+            // Error deleting prescription silently
           }
         );
       });
@@ -491,13 +465,13 @@ export class Billing implements OnInit, OnDestroy {
               // Success, stock restored
             },
             (error) => {
-              console.error('Error updating medicine stock:', error);
+              // Error updating medicine stock silently
             }
           );
         }
       },
       (error) => {
-        console.error('Error fetching medicine:', error);
+        // Error fetching medicine silently
       }
     );
   }

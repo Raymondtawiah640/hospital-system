@@ -16,9 +16,6 @@ export class AllAppointments implements OnInit {
   errorMessage: string = '';
   isLoggedIn: boolean = false;  // Variable to hold login status
 
-  // Modal related
-  showDeleteModal: boolean = false;
-  selectedAppointment: any = null;
 
   // Action loading states
   isMarkingDone: boolean = false;
@@ -60,44 +57,31 @@ export class AllAppointments implements OnInit {
       });
   }
 
-  // Delete an appointment by ID
-  deleteAppointment(appointment: any): void {
-    this.selectedAppointment = appointment;
-    this.showDeleteModal = true;
+
+  // Check if appointment date has been reached
+  canMarkAsDone(appointment: any): boolean {
+    if (!appointment.date) return false;
+    const appointmentDate = new Date(appointment.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day for accurate comparison
+    return appointmentDate <= today;
   }
 
-  confirmDelete(): void {
-    const appointmentId = this.selectedAppointment.id;
-    this.closeModals(); // Close modal immediately
-    this.isLoading = true;
-    this.http.delete(`https://kilnenterprise.com/presbyterian-hospital/delete-appointment.php?id=${appointmentId}`)
-      .subscribe({
-        next: (response: any) => {
-          this.isLoading = false;
-          if (response.success) {
-            // Remove the deleted appointment from the local list
-            this.appointments = this.appointments.filter(appointment => appointment.id !== appointmentId);
-          } else {
-            this.errorMessage = response.message || 'Failed to delete appointment. Please try again later.';
-            // Re-add the appointment to the list if delete failed
-            this.loadAppointments();
-          }
-        },
-        error: (err) => {
-          this.isLoading = false;
-          this.errorMessage = 'There was a problem deleting the appointment. Please try again later.';
-          // Re-add the appointment to the list if delete failed
-          this.loadAppointments();
-        }
-      });
-  }
-
-  closeModals(): void {
-    this.showDeleteModal = false;
-    this.selectedAppointment = null;
+  // Get button class based on appointment status
+  getButtonClass(appointment: any): string {
+    if (this.isMarkingDone) return 'bg-gray-400 cursor-not-allowed';
+    return this.canMarkAsDone(appointment)
+      ? 'bg-green-500 hover:bg-green-700'
+      : 'bg-gray-300 cursor-not-allowed';
   }
 
   markAsDone(appointment: any): void {
+    // Only allow marking as done if date has been reached
+    if (!this.canMarkAsDone(appointment)) {
+      this.errorMessage = 'Cannot mark appointment as done before the scheduled date.';
+      return;
+    }
+
     this.isMarkingDone = true;
     this.http.put(`https://kilnenterprise.com/presbyterian-hospital/update-appointment.php`, { id: appointment.id })
       .subscribe({

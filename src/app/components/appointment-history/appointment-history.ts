@@ -32,14 +32,13 @@ export class AppointmentHistory implements OnInit {
 
   loadAppointmentHistory(): void {
     this.isLoading = true;
-    // Assuming there's an API for appointment history, or use the same as all-appointments
-    // For now, using the same endpoint but could filter on backend
-    this.http.get('https://kilnenterprise.com/presbyterian-hospital/get-all-appointments.php')
+    // Request appointment history including past appointments
+    this.http.get('https://kilnenterprise.com/presbyterian-hospital/get-all-appointments.php?history=true')
       .subscribe({
         next: (data: any) => {
           this.isLoading = false;
           if (data.success) {
-            // Filter for past appointments (assuming date is in YYYY-MM-DD format)
+            // Filter for past appointments only (completed appointments)
             const today = new Date().toISOString().split('T')[0];
             this.appointments = data.appointments.filter((appointment: any) => appointment.date < today);
             this.filteredAppointments = this.appointments; // Initialize filtered list
@@ -64,6 +63,11 @@ export class AppointmentHistory implements OnInit {
           .includes(this.searchTerm.toLowerCase())
       );
     }
+  }
+
+  // Method to refresh appointment history (can be called from other components)
+  refreshHistory(): void {
+    this.loadAppointmentHistory();
   }
 
   ngDoCheck(): void {

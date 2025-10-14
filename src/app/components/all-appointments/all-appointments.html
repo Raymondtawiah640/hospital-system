@@ -36,12 +36,10 @@
           <td class="px-6 py-4 text-sm text-gray-800">{{ appointment.time }}</td>
           <td class="px-6 py-4 text-sm text-gray-800">{{ appointment.reason }}</td>
           <td class="px-6 py-4 text-sm text-gray-800">
-            <button (click)="markAsDone(appointment)" [disabled]="isMarkingDone" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700 mr-2 disabled:opacity-60 disabled:cursor-not-allowed">
+            <button (click)="markAsDone(appointment)" [disabled]="isMarkingDone || !canMarkAsDone(appointment)" [ngClass]="getButtonClass(appointment)" class="text-white px-3 py-1 rounded transition duration-200">
               <span *ngIf="isMarkingDone">Processing...</span>
-              <span *ngIf="!isMarkingDone">Done</span>
-            </button>
-            <button (click)="deleteAppointment(appointment)" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700">
-              Delete
+              <span *ngIf="!isMarkingDone && canMarkAsDone(appointment)">Done</span>
+              <span *ngIf="!isMarkingDone && !canMarkAsDone(appointment)">Pending</span>
             </button>
           </td>
         </tr>
@@ -53,16 +51,5 @@
       No appointments available.
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div *ngIf="showDeleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
-        <h3 class="text-xl font-semibold mb-4">Confirm Delete</h3>
-        <p *ngIf="selectedAppointment">Are you sure you want to delete the appointment for <strong>{{ selectedAppointment.patient_name }} {{ selectedAppointment.patient_lastname }}</strong> with <strong>{{ selectedAppointment.doctor_name }} {{ selectedAppointment.doctor_lastname }}</strong> on <strong>{{ selectedAppointment.date }}</strong>? This action cannot be undone.</p>
-        <div class="mt-4 flex justify-end space-x-2">
-          <button (click)="closeModals()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
-          <button (click)="confirmDelete()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
-        </div>
-      </div>
-    </div>
   </div>
 </div>

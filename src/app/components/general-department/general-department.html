@@ -487,7 +487,7 @@
                      [disabled]="medicines.length === 0">
                <option value="">Choose medication...</option>
                <option *ngFor="let medicine of medicines" [value]="medicine.name">
-                 {{ medicine.name }} - ₱{{ medicine.price }} (Stock: {{ medicine.stock_quantity }})
+                 {{ medicine.name }} - GH₵{{ medicine.price }} (Stock: {{ medicine.stock_quantity }})
                </option>
              </select>
              <button type="button" (click)="medSelect.value = ''"
