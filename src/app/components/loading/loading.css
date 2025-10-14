@@ -1,0 +1,400 @@
+/* Enhanced Medical Loading Overlay - Website Color Theme */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #ff6b6b 0%, #2ecc71 50%, #45b7d1 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+/* Animated Background */
+.background-animation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.floating-element {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: float 8s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.element-1 {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(45deg, #ff6b6b, #ff9999);
+  top: 10%;
+  left: 5%;
+  animation-delay: 0s;
+}
+
+.element-2 {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(45deg, #2ecc71, #99ff99);
+  top: 20%;
+  right: 10%;
+  animation-delay: 2s;
+}
+
+.element-3 {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(45deg, #45b7d1, #99ccff);
+  bottom: 15%;
+  left: 8%;
+  animation-delay: 4s;
+}
+
+.element-4 {
+  width: 35px;
+  height: 35px;
+  background: linear-gradient(45deg, #ffffff, #f0f0f0);
+  top: 60%;
+  right: 15%;
+  animation-delay: 1s;
+}
+
+.element-5 {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(45deg, #ff6b6b, #2ecc71);
+  bottom: 10%;
+  right: 8%;
+  animation-delay: 3s;
+}
+
+.element-6 {
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(45deg, #45b7d1, #ffffff);
+  top: 15%;
+  left: 25%;
+  animation-delay: 5s;
+}
+
+.element-7 {
+  width: 55px;
+  height: 55px;
+  background: linear-gradient(45deg, #ff6b6b, #45b7d1);
+  bottom: 25%;
+  right: 20%;
+  animation-delay: 1.5s;
+}
+
+.element-8 {
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(45deg, #2ecc71, #ffffff);
+  top: 45%;
+  left: 15%;
+  animation-delay: 6s;
+}
+
+/* Pulsing Elements */
+.pulse-element {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.pulse-1 {
+  width: 100px;
+  height: 100px;
+  top: 5%;
+  right: 5%;
+  animation-delay: 0s;
+}
+
+.pulse-2 {
+  width: 80px;
+  height: 80px;
+  bottom: 5%;
+  left: 20%;
+  animation-delay: 1s;
+}
+
+.pulse-3 {
+  width: 120px;
+  height: 120px;
+  top: 50%;
+  right: 25%;
+  animation-delay: 2s;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  min-width: 320px;
+  position: relative;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.loading-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent, rgba(78, 205, 196, 0.08), transparent);
+  animation: shimmer 3s infinite;
+}
+
+/* Medical-themed Pulsing Loader */
+.medical-loader {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse-ring {
+  position: absolute;
+  border: 3px solid rgba(255, 107, 107, 0.3);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.pulse-ring.ring2 {
+  width: 80px;
+  height: 80px;
+  animation-delay: 0.3s;
+  border-color: rgba(46, 204, 113, 0.4);
+}
+
+.pulse-ring.ring3 {
+  width: 60px;
+  height: 60px;
+  animation-delay: 0.6s;
+  border-color: rgba(69, 183, 209, 0.3);
+}
+
+.medical-cross {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cross-horizontal,
+.cross-vertical {
+  position: absolute;
+  background: linear-gradient(45deg, #ff6b6b, #2ecc71);
+  border-radius: 2px;
+}
+
+.cross-horizontal {
+  width: 30px;
+  height: 6px;
+}
+
+.cross-vertical {
+  width: 6px;
+  height: 30px;
+}
+
+/* Enhanced Loading Text */
+.loading-text-container {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.loading-text {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.3rem;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+}
+
+.loading-dots {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: linear-gradient(45deg, #ffffff, #2ecc71);
+  border-radius: 50%;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.dot:nth-child(1) {
+  background: linear-gradient(45deg, #ff6b6b, #ffffff);
+}
+
+.dot:nth-child(2) {
+  background: linear-gradient(45deg, #2ecc71, #45b7d1);
+}
+
+.dot:nth-child(3) {
+  background: linear-gradient(45deg, #2ecc71, #ffffff);
+}
+
+/* Progress Bar */
+.progress-container {
+  width: 100%;
+  max-width: 250px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(46, 204, 113, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b6b, #2ecc71, #ffffff, #45b7d1);
+  border-radius: 2px;
+  animation: progress 5s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+@keyframes progress {
+  0% {
+    width: 0%;
+  }
+  15% {
+    width: 20%;
+  }
+  30% {
+    width: 40%;
+  }
+  45% {
+    width: 60%;
+  }
+  60% {
+    width: 75%;
+  }
+  75% {
+    width: 85%;
+  }
+  90% {
+    width: 95%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateY(-30px) rotate(90deg) scale(1.1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-15px) rotate(180deg) scale(0.9);
+    opacity: 0.35;
+  }
+  75% {
+    transform: translateY(-35px) rotate(270deg) scale(1.1);
+    opacity: 0.45;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    transform: scale(0.8);
+    opacity: 0.2;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.5;
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* Ensure loading overlay covers everything */
+:host {
+  display: contents;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .loading-container {
+    padding: 2rem;
+    min-width: 280px;
+    margin: 1rem;
+  }
+
+  .medical-loader {
+    width: 100px;
+    height: 100px;
+  }
+
+  .loading-text {
+    font-size: 1.1rem;
+  }
+}
