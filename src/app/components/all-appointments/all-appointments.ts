@@ -3,18 +3,22 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';  // Import Router to navigate
 import { AuthService } from '../../services/auth';  // Import AuthService
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-all-appointments',
   templateUrl: './all-appointments.html',
   styleUrls: ['./all-appointments.css'],
-  imports: [CommonModule]
+  standalone: true,
+  imports: [CommonModule, FormsModule]
 })
 export class AllAppointments implements OnInit {
-  appointments: any[] = [];  // Array to hold the list of appointments
-  isLoading: boolean = false;
-  errorMessage: string = '';
-  isLoggedIn: boolean = false;  // Variable to hold login status
+   appointments: any[] = [];  // Array to hold the list of appointments
+   filteredAppointments: any[] = [];  // Array to hold filtered appointments for search
+   isLoading: boolean = false;
+   errorMessage: string = '';
+   isLoggedIn: boolean = false;  // Variable to hold login status
+   searchTerm: string = '';
 
 
   // Action loading states
@@ -46,6 +50,7 @@ export class AllAppointments implements OnInit {
           this.isLoading = false;
           if (data.success) {
             this.appointments = data.appointments;  // Store the list of appointments
+            this.filteredAppointments = [...this.appointments];  // Initialize filtered list
           } else {
             this.errorMessage = 'Failed to load appointments. Please try again later.';  // Show error
           }
@@ -90,6 +95,7 @@ export class AllAppointments implements OnInit {
           if (response.success) {
             // Remove from current list since it's now completed
             this.appointments = this.appointments.filter(a => a.id !== appointment.id);
+            this.filteredAppointments = this.filteredAppointments.filter(a => a.id !== appointment.id);
           } else {
             this.errorMessage = response.message || 'Failed to mark appointment as done.';
           }
@@ -99,5 +105,23 @@ export class AllAppointments implements OnInit {
           this.errorMessage = 'There was a problem updating the appointment.';
         }
       });
+  }
+
+  // Filter appointments based on search term
+  filterAppointments(): void {
+    if (!this.searchTerm) {
+      this.filteredAppointments = this.appointments;
+    } else {
+      this.filteredAppointments = this.appointments.filter(appointment =>
+        `${appointment.patient_name} ${appointment.patient_lastname} ${appointment.doctor_name} ${appointment.doctor_lastname} ${appointment.department} ${appointment.date} ${appointment.reason}`
+          .toLowerCase()
+          .includes(this.searchTerm.toLowerCase())
+      );
+    }
+  }
+
+  // Listen for search input changes
+  onSearchChange(): void {
+    this.filterAppointments();
   }
 }
