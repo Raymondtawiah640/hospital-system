@@ -39,7 +39,7 @@
      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
        <div>
          <label class="block text-gray-700 font-semibold mb-2">
-           Patient ID <span [ngClass]="getAsteriskClass('patientId')" class="text-lg">*</span>
+           Patient ID <span [ngClass]="getAsteriskClass('patientId')" class="text-lg no-print">*</span>
          </label>
          <div class="flex gap-2">
            <input type="text" [(ngModel)]="consultationData.patientId" name="patientId" required
@@ -94,7 +94,7 @@
        </div>
        <div>
          <label class="block text-gray-700 font-semibold mb-2">
-           Full Name <span [ngClass]="getAsteriskClass('patientName')" class="text-lg">*</span>
+           Full Name <span [ngClass]="getAsteriskClass('patientName')" class="text-lg no-print">*</span>
          </label>
          <input type="text" [(ngModel)]="consultationData.patientName" name="patientName" required
                 (input)="onFieldChange('patientName')"
@@ -107,7 +107,7 @@
        </div>
        <div>
          <label class="block text-gray-700 font-semibold mb-2">
-           Age <span [ngClass]="getAsteriskClass('age')" class="text-lg">*</span>
+           Age <span [ngClass]="getAsteriskClass('age')" class="text-lg no-print">*</span>
          </label>
          <input type="number" [(ngModel)]="consultationData.age" name="age" min="1" max="150" required
                 (input)="onFieldChange('age')"
@@ -120,7 +120,7 @@
        </div>
        <div>
          <label class="block text-gray-700 font-semibold mb-2">
-           Gender <span [ngClass]="getAsteriskClass('gender')" class="text-lg">*</span>
+           Gender <span [ngClass]="getAsteriskClass('gender')" class="text-lg no-print">*</span>
          </label>
          <select [(ngModel)]="consultationData.gender" name="gender" required
                  (change)="onFieldChange('gender')"
@@ -179,12 +179,12 @@
 
      <div>
        <label class="block text-gray-700 font-semibold mb-2">
-         Consulting Doctor
+         Consulting Doctor <span [ngClass]="getAsteriskClass('selectedDoctorId')" class="text-lg no-print">*</span>
        </label>
-       <select [(ngModel)]="consultationData.selectedDoctorId" name="selectedDoctorId"
+       <select [(ngModel)]="consultationData.selectedDoctorId" name="selectedDoctorId" required
                (change)="onFieldChange('selectedDoctorId'); onDoctorChange()"
                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-         <option value="">Select Doctor (Optional)</option>
+         <option value="">Select Doctor</option>
          <option *ngFor="let doctor of doctors" [value]="doctor.doctor_id">
            {{ doctor.first_name }} {{ doctor.last_name }} - {{ doctor.specialization || doctor.department }}
          </option>
@@ -198,7 +198,7 @@
 
      <div>
        <label class="block text-gray-700 font-semibold mb-2">
-         Chief Complaint <span [ngClass]="getAsteriskClass('chiefComplaint')" class="text-lg">*</span>
+         Chief Complaint <span [ngClass]="getAsteriskClass('chiefComplaint')" class="text-lg no-print">*</span>
        </label>
        <textarea [(ngModel)]="consultationData.chiefComplaint" name="chiefComplaint" rows="3" required
                  (input)="onFieldChange('chiefComplaint')"
@@ -444,7 +444,7 @@
      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
        <div>
          <label class="block text-gray-700 font-semibold mb-2">
-           Diagnosis <span [ngClass]="getAsteriskClass('diagnosis')" class="text-lg">*</span>
+           Diagnosis <span [ngClass]="getAsteriskClass('diagnosis')" class="text-lg no-print">*</span>
          </label>
          <textarea [(ngModel)]="consultationData.diagnosis" name="diagnosis" rows="3" required
                    (input)="onFieldChange('diagnosis')"

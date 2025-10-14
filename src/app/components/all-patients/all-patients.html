@@ -51,16 +51,90 @@
 </div>
 
 <!-- Patient Details Modal -->
-<div *ngIf="selectedPatient" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-  <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-    <h3 class="text-2xl font-bold mb-4">Patient Details</h3>
-    <p><strong>First Name:</strong> {{ selectedPatient.first_name }}</p>
-    <p><strong>Last Name:</strong> {{ selectedPatient.last_name }}</p>
-    <p><strong>Email:</strong> {{ selectedPatient.email }}</p>
-    <p><strong>Phone Number:</strong> {{ selectedPatient.phone_number }}</p>
-    <p><strong>Address:</strong> {{ selectedPatient.residential_address }}</p>
-    <p><strong>Emergency Contact:</strong> {{ selectedPatient.emergency_name }} - {{ selectedPatient.emergency_phone }}</p>
-    <p><strong>Ghana Card Number:</strong> {{ selectedPatient.ghana_card_number }}</p> <!-- Added Ghana Card Number -->
-    <button (click)="closeModal()" class="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 w-full">Close</button>
+<div *ngIf="selectedPatient" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
+  <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
+    <!-- Modal Header -->
+    <div class="bg-blue-600 text-white p-6 rounded-t-lg">
+      <div class="flex justify-between items-center">
+        <h3 class="text-2xl font-bold">Complete Patient Details</h3>
+        <button (click)="closeModal()" class="text-white hover:text-gray-200 text-2xl">&times;</button>
+      </div>
+      <p class="text-blue-100 mt-2">Patient ID: {{ selectedPatient.id }} | Ghana Card: {{ selectedPatient.ghana_card_number }}</p>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Basic Information -->
+        <div class="bg-blue-50 p-4 rounded-lg">
+          <h4 class="text-lg font-semibold text-blue-800 mb-3 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+            Basic Information
+          </h4>
+          <div class="space-y-2">
+            <p><strong>First Name:</strong> <span class="text-gray-700">{{ selectedPatient.first_name }}</span></p>
+            <p><strong>Last Name:</strong> <span class="text-gray-700">{{ selectedPatient.last_name }}</span></p>
+            <p><strong>Date of Birth:</strong> <span class="text-gray-700">{{ selectedPatient.date_of_birth | date:'mediumDate' }}</span></p>
+            <p><strong>Gender:</strong> <span class="text-gray-700">{{ selectedPatient.gender }}</span></p>
+            <p><strong>Blood Group:</strong> <span class="text-gray-700">{{ selectedPatient.blood_group || 'Not specified' }}</span></p>
+          </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="bg-green-50 p-4 rounded-lg">
+          <h4 class="text-lg font-semibold text-green-800 mb-3 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            Contact Information
+          </h4>
+          <div class="space-y-2">
+            <p><strong>Phone Number:</strong> <span class="text-gray-700">{{ selectedPatient.phone_number }}</span></p>
+            <p><strong>Email:</strong> <span class="text-gray-700">{{ selectedPatient.email }}</span></p>
+            <p><strong>Residential Address:</strong> <span class="text-gray-700">{{ selectedPatient.residential_address }}</span></p>
+          </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        <div class="bg-red-50 p-4 rounded-lg">
+          <h4 class="text-lg font-semibold text-red-800 mb-3 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Emergency Contact
+          </h4>
+          <div class="space-y-2">
+            <p><strong>Emergency Contact:</strong> <span class="text-gray-700">{{ selectedPatient.emergency_name }}</span></p>
+            <p><strong>Emergency Phone:</strong> <span class="text-gray-700">{{ selectedPatient.emergency_phone }}</span></p>
+          </div>
+        </div>
+
+        <!-- Medical Information -->
+        <div class="bg-purple-50 p-4 rounded-lg">
+          <h4 class="text-lg font-semibold text-purple-800 mb-3 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Medical Information
+          </h4>
+          <div class="space-y-2">
+            <p><strong>Patient ID:</strong> <span class="text-gray-700">{{ selectedPatient.id }}</span></p>
+            <p><strong>Ghana Card Number:</strong> <span class="text-gray-700">{{ selectedPatient.ghana_card_number }}</span></p>
+            <p><strong>Registration Date:</strong> <span class="text-gray-700">{{ selectedPatient.created_at | date:'medium' }}</span></p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-end mt-6 pt-6 border-t">
+        <button (click)="closeModal()" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200">
+          Close
+        </button>
+      </div>
+    </div>
   </div>
 </div>

@@ -220,11 +220,14 @@
           class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none">
       </div>
 
-      <div *ngIf="prescriptions.length === 0" class="text-center py-8 text-gray-500">
-        No prescriptions found.
+      <div *ngIf="(getFilteredPrescriptions() || []).length === 0" class="text-center py-8 text-gray-500">
+        <p>No prescriptions found.</p>
+        <p class="text-sm mt-2">Debug: Check console for prescription data</p>
       </div>
 
-      <div *ngFor="let prescription of getFilteredPrescriptions()" class="bg-gray-50 p-4 rounded-lg mb-4 border">
+
+      <div *ngFor="let prescription of getFilteredPrescriptions(); let i = index" class="bg-gray-50 p-4 rounded-lg mb-4 border">
+
         <div class="flex justify-between items-start mb-3">
           <div>
             <h3 class="font-semibold text-lg">{{ prescription.patient_name }}</h3>

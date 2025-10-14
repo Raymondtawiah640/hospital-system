@@ -24,7 +24,6 @@ export class Login implements OnInit {
    // Centralized messages for better maintainability
    readonly messages = {
      // Authentication status messages
-     noPasswordSet: '🔓 No password set - You can set a new password',
      passwordRequired: '🔐 Password required - Enter correct password to login',
      passwordCleared: '🔓 Password cleared from database. You can now set a new password.',
      enterNewPassword: '🔓 Enter your new password.',
@@ -173,7 +172,7 @@ export class Login implements OnInit {
   }
 
   getAuthStatusText(): string {
-    return this.hasPasswordInDB ? 'Password Required' : 'Set New Password';
+    return this.hasPasswordInDB ? 'Password Required' : 'Enter Password';
   }
 
   login(): void {
@@ -208,7 +207,7 @@ export class Login implements OnInit {
           if (res.message && (res.message.includes('no password') || res.message.includes('empty'))) {
             // No password in database
             this.hasPasswordInDB = false;
-            this.message = this.messages.noPasswordSet;
+            this.message = this.messages.enterNewPassword;
           } else {
             // Any credential issue - use general message
             this.message = res.message || this.messages.wrongCredentials;

@@ -1,10 +1,6 @@
 <?php
 // ----------------- DEBUG & ERROR -----------------
-ini_set('display_errors', 1); // Keep errors visible during development
-ini_set('display_startup_errors', 1); // Show startup errors for troubleshooting
-ini_set('log_errors', 1); // Log errors to a file
-ini_set('error_log', '/var/log/apache2/php_errors.log'); // Log errors to the Apache error log
-error_reporting(E_ALL); // Report all errors
+// Error settings can be enabled during development if needed
 
 // ----------------- HEADERS -----------------
 header("Content-Type: application/json; charset=UTF-8");
@@ -21,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // ----------------- DB CONNECTION -----------------
 require_once 'db_connect.php';
 if (!isset($pdo)) {
-    error_log("DEBUG: PDO not set after db_connect.php");
     http_response_code(500);  // Server error
     echo json_encode(["success" => false, "message" => "❌ Database connection missing."]);
     exit;
@@ -30,7 +25,6 @@ if (!isset($pdo)) {
 // ----------------- INPUT -----------------
 $inputJSON = file_get_contents("php://input");
 if ($inputJSON === false) {
-    error_log("DEBUG: Failed to read php://input");
     http_response_code(400); // Bad request
     echo json_encode(["success" => false, "message" => "❌ Failed to read request data."]);
     exit;
@@ -38,7 +32,6 @@ if ($inputJSON === false) {
 
 $input = json_decode($inputJSON, true);
 if ($input === null) {
-    error_log("DEBUG: JSON decode failed: " . json_last_error_msg());
     http_response_code(400); // Bad request
     echo json_encode(["success" => false, "message" => "❌ Invalid JSON input."]);
     exit;
@@ -57,46 +50,76 @@ $residential_addr  = trim($input['residential_addr'] ?? '');
 $emergency_name    = trim($input['emergency_name'] ?? '');
 $emergency_phone   = trim($input['emergency_phone'] ?? '');
 
-// Check for missing required fields
-if (empty($first_name) || empty($last_name) || empty($ghana_card_number) || empty($date_of_birth) || 
-    empty($gender) || empty($blood_group) || empty($phone_number) || empty($email) || 
-    empty($residential_addr) || empty($emergency_name) || empty($emergency_phone)) {
+// Optional: Log received data for debugging (can be removed in production)
+error_log("DEBUG add-patient.php - Received data: " . json_encode($input));
+
+// Check for missing required fields (only truly essential fields)
+$requiredFields = [
+    'first_name' => $first_name,
+    'last_name' => $last_name,
+    'ghana_card_number' => $ghana_card_number,
+    'date_of_birth' => $date_of_birth,
+    'gender' => $gender,
+    'phone_number' => $phone_number,
+    'emergency_name' => $emergency_name,
+    'emergency_phone' => $emergency_phone
+];
+
+// Optional fields that can be empty
+$optionalFields = [
+    'blood_group' => $blood_group,
+    'email' => $email,
+    'residential_addr' => $residential_addr
+];
+
+$missingFields = [];
+foreach ($requiredFields as $fieldName => $value) {
+    if (empty(trim($value))) {
+        $missingFields[] = $fieldName;
+    }
+}
+
+if (!empty($missingFields)) {
     http_response_code(400); // Bad request
-    echo json_encode(["success" => false, "message" => "⚠️ All fields are required."]);
+    echo json_encode([
+        "success" => false,
+        "message" => "⚠️ Please fill in all required fields: " . implode(', ', $missingFields) . ". Email, blood group, and address are optional."
+    ]);
     exit;
 }
 
 try {
     // ----------------- INSERT PATIENT DATA -----------------
-    $stmt = $pdo->prepare("INSERT INTO patients (first_name, last_name, ghana_card_number, date_of_birth, gender, blood_group, phone_number, email, residential_address, emergency_name, emergency_phone) 
+    $stmt = $pdo->prepare("INSERT INTO patients (first_name, last_name, ghana_card_number, date_of_birth, gender, blood_group, phone_number, email, residential_address, emergency_name, emergency_phone)
                           VALUES (:first_name, :last_name, :ghana_card_number, :date_of_birth, :gender, :blood_group, :phone_number, :email, :residential_addr, :emergency_name, :emergency_phone)");
 
-    $stmt->execute([
+    $executeData = [
         ':first_name'        => $first_name,
         ':last_name'         => $last_name,
         ':ghana_card_number' => $ghana_card_number,
         ':date_of_birth'     => $date_of_birth,
         ':gender'            => $gender,
-        ':blood_group'       => $blood_group,
+        ':blood_group'       => !empty($blood_group) ? $blood_group : 'N/A',
         ':phone_number'      => $phone_number,
-        ':email'             => $email,
-        ':residential_addr'  => $residential_addr,
+        ':email'             => !empty($email) ? $email : 'N/A',
+        ':residential_addr'  => !empty($residential_addr) ? $residential_addr : 'N/A',
         ':emergency_name'    => $emergency_name,
         ':emergency_phone'   => $emergency_phone
-    ]);
+    ];
+
+    $stmt->execute($executeData);
 
     // ----------------- SUCCESS -----------------
     echo json_encode(["success" => true, "message" => "✅ Patient added successfully"]);
 
-} catch (PDOException $e) {
+} catch(PDOException $e) {
     // Handle database errors
-    error_log("DB ERROR in add-patient.php: " . $e->getMessage());
     http_response_code(500); // Internal server error
-    echo json_encode(["success" => false, "message" => "❌ Server error. Please try again later."]);
-} catch (Exception $e) {
+    echo json_encode(["success" => false, "message" => "❌ Database error occurred."]);
+} catch(Exception $e) {
     // Handle general errors
-    error_log("GENERAL ERROR in add-patient.php: " . $e->getMessage());
     http_response_code(500); // Internal server error
     echo json_encode(["success" => false, "message" => "❌ Server error. Please try again later."]);
 }
+
 ?>

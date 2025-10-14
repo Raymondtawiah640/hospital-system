@@ -1,23 +1,23 @@
 <div class="min-h-screen bg-gray-100 p-6 space-y-8">
 
   <!-- Page Header -->
-  <div class="max-w-7xl mx-auto mb-6">
-    <h1 class="text-3xl font-bold text-blue-700">Pharmacy Management</h1>
-    <p class="text-gray-600 mt-1">
-      Manage prescriptions and medicine inventory. View patient prescriptions, check payment status, and maintain medicine stock.
+  <div class="max-w-5xl mx-auto mb-6">
+    <h1 class="text-2xl font-bold text-blue-700">Pharmacy Management</h1>
+    <p class="text-gray-600 mt-1 text-sm">
+      Manage prescriptions and medicine inventory.
     </p>
   </div>
 
   <!-- Success and Error Messages -->
-  <div *ngIf="successMessage" class="bg-green-200 text-green-800 p-2 mt-4 rounded-md max-w-7xl mx-auto">
+  <div *ngIf="successMessage" class="bg-green-200 text-green-800 p-2 mt-4 rounded-md max-w-5xl mx-auto">
     {{ successMessage }}
   </div>
-  <div *ngIf="errorMessage" class="bg-red-200 text-red-800 p-2 mt-4 rounded-md max-w-7xl mx-auto">
+  <div *ngIf="errorMessage" class="bg-red-200 text-red-800 p-2 mt-4 rounded-md max-w-5xl mx-auto">
     {{ errorMessage }}
   </div>
 
   <!-- Loading Spinner -->
-  <div *ngIf="isLoading" class="text-center mt-4 max-w-7xl mx-auto">
+  <div *ngIf="isLoading" class="text-center mt-4 max-w-5xl mx-auto">
     <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
       <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" fill="none"></circle>
       <path fill="currentColor" d="M10 2a8 8 0 000 16 8 8 0 000-16z"></path>
@@ -25,14 +25,31 @@
     Loading prescriptions...
   </div>
 
-  <!-- Search Prescriptions -->
-  <div class="max-w-7xl mx-auto mb-6">
-    <input type="text" [(ngModel)]="searchTerm" placeholder="Search prescriptions..."
-      class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none">
+  <!-- Separate Search Sections -->
+  <div class="max-w-4xl mx-auto mb-6">
+    <!-- Search Prescriptions -->
+    <div class="mb-4">
+      <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded-r-lg">
+        <div class="flex items-center mb-2">
+          <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <label class="block text-blue-800 font-medium text-sm">Search Prescriptions</label>
+        </div>
+        <div class="flex gap-2">
+          <input type="text" [(ngModel)]="prescriptionSearchTerm" placeholder="Patient, doctor, or medicine name..."
+            class="flex-1 px-3 py-2 border border-blue-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none bg-white text-sm">
+          <button *ngIf="prescriptionSearchTerm" (click)="clearPrescriptionSearch()"
+            class="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition duration-200 text-sm">
+            Clear
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Prescriptions Table -->
-  <div class="max-w-7xl mx-auto overflow-x-auto bg-white rounded-lg shadow-md">
+  <div class="max-w-5xl mx-auto overflow-x-auto bg-white rounded-lg shadow-md">
     <table class="min-w-full">
       <thead class="bg-blue-700 text-white">
         <tr>
@@ -46,7 +63,7 @@
       <tbody class="divide-y divide-gray-200">
         <tr *ngFor="let prescription of filteredPrescriptions">
           <td class="px-4 py-2">{{ prescription.patient_name }}</td>
-          <td class="px-4 py-2">{{ prescription.doctor_name }}</td>
+          <td class="px-4 py-2">{{ prescription.doctor_name || 'Unknown Doctor' }}</td>
           <td class="px-4 py-2">
             <div *ngFor="let med of prescription.prescriptions">
               {{ med.medicine_name }} ({{ med.dosage }})
@@ -75,7 +92,7 @@
       <h3 class="text-xl font-semibold mb-4">Prescription Details</h3>
       <div *ngIf="selectedPrescription" class="space-y-2">
         <p><strong>Patient:</strong> {{ selectedPrescription.patient_name }}</p>
-        <p><strong>Doctor:</strong> {{ selectedPrescription.doctor_name }}</p>
+        <p><strong>Doctor:</strong> {{ selectedPrescription.doctor_name || 'Unknown Doctor' }}</p>
         <p><strong>Payment Status:</strong> <span [ngClass]="getPaymentStatusClass(getPaymentStatus(selectedPrescription.patient_name))"> {{ getPaymentStatus(selectedPrescription.patient_name) }}</span></p>
         <h4 class="font-semibold mt-4">Medicines:</h4>
         <ul class="list-disc list-inside">
@@ -123,18 +140,35 @@
     </div>
 
     <!-- Search & Add Medicine -->
-    <div class="flex flex-col md:flex-row md:justify-between items-start md:items-center mb-6 gap-4">
-      <div class="w-full md:w-1/2">
-        <input type="text" [(ngModel)]="searchTerm" placeholder="Search medicines..."
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none">
-      </div>
-      <div>
-        <button (click)="addNewMedicine()"
-          class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-300">
-          + Add New Medicine
-        </button>
-      </div>
-    </div>
+    <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center mb-6 gap-4">
+       <!-- Medicine Search -->
+       <div class="w-full sm:w-80">
+         <div class="bg-green-50 border-l-4 border-green-400 p-3 rounded-r-lg">
+           <div class="flex items-center mb-2">
+             <svg class="w-4 h-4 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+             </svg>
+             <label class="block text-green-800 font-medium text-sm">Search Medicines</label>
+           </div>
+           <div class="flex gap-2">
+             <input type="text" [(ngModel)]="medicineSearchTerm" placeholder="Medicine name, description, or price..."
+               class="flex-1 px-3 py-2 border border-green-300 rounded-md shadow-sm focus:ring-2 focus:ring-green-400 focus:outline-none bg-white text-sm">
+             <button *ngIf="medicineSearchTerm" (click)="clearMedicineSearch()"
+               class="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition duration-200 text-sm">
+               Clear
+             </button>
+           </div>
+         </div>
+       </div>
+
+       <!-- Add Medicine Button -->
+       <div class="w-full sm:w-auto">
+         <button (click)="addNewMedicine()"
+           class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-300">
+           + Add New Medicine
+         </button>
+       </div>
+     </div>
 
     <!-- Medicine Table -->
     <div class="overflow-x-auto bg-white rounded-lg shadow-md">

@@ -70,7 +70,7 @@ try {
     // Execute update
     $updateQuery = $pdo->prepare("
         UPDATE consultations
-        SET " . implode(', ', $updateFields) . ", updated_at = NOW()
+        SET " . implode(', ', $updateFields) . "
         WHERE id = ?
     ");
 

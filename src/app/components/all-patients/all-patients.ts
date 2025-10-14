@@ -34,44 +34,99 @@ export class AllPatients implements OnInit {
 
   // Fetch all patient records from the backend using the PHP script
   fetchPatients() {
-    this.http.get<any[]>('https://kilnenterprise.com/presbyterian-hospital/get-patients.php').subscribe({
-      next: (data) => {
-        this.patients = data;
-        this.filteredPatients = data;  // Show all patients initially
+    this.http.get<any>('https://kilnenterprise.com/presbyterian-hospital/get-patients.php').subscribe({
+      next: (response) => {
+        // Handle both array response and object response with patients property
+        if (Array.isArray(response)) {
+          this.patients = response;
+        } else if (response && response.patients) {
+          this.patients = response.patients;
+        } else if (response && response.success && response.data) {
+          this.patients = response.data;
+        } else {
+          this.patients = [];
+          console.error('Unexpected API response format:', response);
+        }
+
+        this.filteredPatients = [...this.patients];  // Show all patients initially
       },
       error: (err) => {
         console.error('Error fetching patients:', err);
+        this.patients = [];
+        this.filteredPatients = [];
       }
     });
   }
 
   // Triggered when the search query changes
   onSearch() {
+    // Ensure patients array exists
+    if (!Array.isArray(this.patients)) {
+      this.filteredPatients = [];
+      return;
+    }
+
     if (this.searchQuery.trim() === '') {
       this.isSearching = false;
-      this.filteredPatients = this.patients;  // Show all patients if search is empty
+      this.filteredPatients = [...this.patients];  // Show all patients if search is empty
     } else {
       this.isSearching = true;
       this.filteredPatients = this.patients.filter(patient => {
+        if (!patient) return false;
+
         return (
-          patient.first_name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          patient.last_name.toLowerCase().includes(this.searchQuery.toLowerCase())
+          (patient.first_name && patient.first_name.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
+          (patient.last_name && patient.last_name.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
+          (patient.ghana_card_number && patient.ghana_card_number.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
+          (patient.phone_number && patient.phone_number.toLowerCase().includes(this.searchQuery.toLowerCase()))
         );
       });
-
-      if (this.filteredPatients.length === 0) {
-        console.log("No patients found for the search query");
-      }
     }
   }
 
   // Display patient details when a patient is clicked
   onPatientClick(patient: any) {
-    this.selectedPatient = patient;
+    if (patient) {
+      this.selectedPatient = patient;
+    }
   }
 
   // Close the modal displaying patient details
   closeModal() {
     this.selectedPatient = null;  // Reset the selected patient
+  }
+
+  // Calculate age from date of birth
+  calculateAge(dateOfBirth: string): number {
+    if (!dateOfBirth) return 0;
+    const birthDate = new Date(dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
+  // Format registration date
+  formatRegistrationDate(dateString: string): string {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
+  // Check if patients are loaded
+  hasPatients(): boolean {
+    return Array.isArray(this.patients) && this.patients.length > 0;
+  }
+
+  // Get patients count
+  getPatientsCount(): number {
+    return Array.isArray(this.patients) ? this.patients.length : 0;
   }
 }

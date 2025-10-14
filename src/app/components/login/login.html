@@ -16,9 +16,6 @@
         <span>{{ getAuthStatusIcon() }}</span>
         <span>{{ getAuthStatusText() }}</span>
       </div>
-      <div class="text-sm mt-1" *ngIf="!hasPasswordInDB">
-        {{ messages.noPasswordSet }}
-      </div>
       <div class="text-sm mt-1" *ngIf="hasPasswordInDB">
         {{ messages.passwordRequired }}
       </div>

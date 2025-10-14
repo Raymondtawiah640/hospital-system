@@ -116,14 +116,17 @@ export class Billing implements OnInit, OnDestroy {
           this.totalPages = response.pagination.totalPages;
         } else {
           this.setErrorMessage(response.message || 'Error fetching bills.');
+          // Still try to load prescriptions even if bills fail
+          this.fetchPrescriptions();
           return;
         }
         this.totalBills = this.bills.length;
+
         // Update doctor names if they are fallback
-        this.bills.forEach(bill => {
-          if (bill.doctor_name.startsWith('Doctor ')) {
+        this.bills.forEach((bill) => {
+          if (bill.doctor_name && bill.doctor_name.startsWith('Doctor ')) {
             const id = parseInt(bill.doctor_name.split(' ')[1]);
-            const doctor = this.doctors.find(d => d.id == id);
+            const doctor = this.doctors.find(d => d.id == id || d.doctor_id == id);
             if (doctor) {
               bill.doctor_name = doctor.first_name + ' ' + doctor.last_name;
             }
@@ -131,10 +134,16 @@ export class Billing implements OnInit, OnDestroy {
         });
         this.calculateSummary();
         this.filteredBills = this.bills;
+
+        // Always load prescriptions after bills are loaded
+        this.fetchPrescriptions();
       },
       (error) => {
         this.isLoading = false;
+        console.error('Error fetching bills:', error);
         this.setErrorMessage('Error fetching bills.');
+        // Still try to load prescriptions even if bills fail
+        this.fetchPrescriptions();
       }
     );
   }
@@ -143,47 +152,81 @@ export class Billing implements OnInit, OnDestroy {
     const apiUrl = 'https://kilnenterprise.com/presbyterian-hospital/get-doctor.php';
     this.http.get<any>(apiUrl).subscribe(
       (response) => {
-        if (response.success) {
+        if (response && response.doctors) {
           this.doctors = response.doctors;
-          this.fetchBills();
-          this.fetchPrescriptions();
+        } else if (Array.isArray(response)) {
+          this.doctors = response;
         } else {
-          this.fetchBills();
-          this.fetchPrescriptions();
+          this.doctors = [];
         }
+
+        // Load bills first, then prescriptions
+        this.fetchBills();
       },
       (error) => {
+        console.error('Error loading doctors:', error);
+        this.doctors = [];
+        // Load bills and prescriptions even if doctors fail
         this.fetchBills();
-        this.fetchPrescriptions();
       }
     );
   }
 
   fetchPrescriptions(): void {
-    const apiUrl = 'https://kilnenterprise.com/presbyterian-hospital/prescriptions.php';
+    const apiUrl = 'https://kilnenterprise.com/presbyterian-hospital/prescriptions.php?all=true';
     this.http.get<any[]>(apiUrl).subscribe(
       (response) => {
-        this.prescriptions = response || [];
+        // Use the same simple approach as pharmacy stock component
+        if (Array.isArray(response)) {
+          this.prescriptions = response.map((group: any) => {
+            // Resolve doctor names if they're in "Doctor [ID]" format
+            if (group.doctor_name && group.doctor_name.startsWith('Doctor ')) {
+              const doctorId = parseInt(group.doctor_name.split(' ')[1]);
+              const doctor = this.doctors.find(d => d.id == doctorId || d.doctor_id == doctorId);
+              if (doctor) {
+                group.doctor_name = doctor.first_name + ' ' + doctor.last_name;
+              }
+            }
+
+            return group;
+          });
+        } else {
+          this.prescriptions = [];
+        }
+
         this.filteredPrescriptions = this.prescriptions;
       },
       (error) => {
         this.setErrorMessage('Failed to fetch prescriptions');
+        this.prescriptions = [];
+        this.filteredPrescriptions = [];
       }
     );
   }
 
   getFilteredPrescriptions(): any[] {
-    if (!this.prescriptionSearchTerm) {
-      return this.filteredPrescriptions;
+    // Start with all prescriptions
+    let prescriptions = this.filteredPrescriptions || [];
+
+    // Apply search filter if there's a search term
+    if (this.prescriptionSearchTerm && this.prescriptionSearchTerm.trim()) {
+      const searchTerm = this.prescriptionSearchTerm.toLowerCase();
+      prescriptions = prescriptions.filter((prescription: any) => {
+        const patientName = prescription.patient_name?.toLowerCase() || '';
+        const doctorName = prescription.doctor_name?.toLowerCase() || '';
+        const searchStr = `${patientName} ${doctorName}`;
+        return searchStr.includes(searchTerm);
+      });
     }
-    return this.filteredPrescriptions.filter((prescription: any) => {
-      const searchStr = `${prescription.patient_name} ${prescription.doctor_name}`.toLowerCase();
-      return searchStr.includes(this.prescriptionSearchTerm.toLowerCase());
-    });
+
+    return prescriptions;
   }
 
   hasBill(patientName: string): boolean {
-    return this.bills.some(bill => bill.patient_name === patientName);
+    return this.bills.some(bill =>
+      bill.patient_name && patientName &&
+      bill.patient_name.toLowerCase() === patientName.toLowerCase()
+    );
   }
 
   calculateSummary(): void {
@@ -359,6 +402,10 @@ export class Billing implements OnInit, OnDestroy {
   }
 
   viewPrescriptions(): void {
+    // Clear any previous search and reset filtered prescriptions
+    this.prescriptionSearchTerm = '';
+    this.filteredPrescriptions = this.prescriptions;
+
     this.showPrescriptionModal = true;
   }
 

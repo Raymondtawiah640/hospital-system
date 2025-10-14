@@ -1,57 +1,21 @@
-/* General Department Result Component Styles */
 
-.container {
-  max-width: 100%;
+
+/* Loading Animation - Only custom animation not available in Tailwind */
+.loading-spinner {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid #f3f4f6;
+  border-radius: 50%;
+  border-top-color: #3b82f6;
+  animation: spin 1s ease-in-out infinite;
 }
 
-/* Filter Section */
-.filters-section {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-.filter-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-/* Consultation Cards */
-.consultation-card {
-  transition: all 0.3s ease;
-  border: 1px solid #e2e8f0;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-}
-
-.consultation-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  border-color: #3b82f6;
-}
-
-.card-header {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  color: white;
-}
-
-.patient-name {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
-}
-
-/* Status Badges */
-.status-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
+/* Custom colors for status badges - Only colors not available in Tailwind */
 .status-completed {
   background: #dcfce7;
   color: #166534;
@@ -67,40 +31,7 @@
   color: #991b1b;
 }
 
-/* Information Sections */
-.info-section {
-  background: rgba(59, 130, 246, 0.05);
-  border-radius: 8px;
-  padding: 1rem;
-  border-left: 4px solid #3b82f6;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-/* Tags */
-.symptom-tag {
-  background: #fef3c7;
-  color: #92400e;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.condition-tag {
-  background: #fed7aa;
-  color: #9a3412;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-/* Loading Animation */
+/* Loading Animation - Only custom animation not available in Tailwind */
 .loading-spinner {
   display: inline-block;
   width: 2rem;
@@ -115,180 +46,26 @@
   to { transform: rotate(360deg); }
 }
 
-/* Empty State */
-.empty-state {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: #6b7280;
-}
-
-.empty-icon {
-  width: 4rem;
-  height: 4rem;
-  margin: 0 auto 1rem;
-  opacity: 0.5;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .filter-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .consultation-card {
-    margin: 0 -0.5rem;
-  }
-}
-
-/* Edit Modal Styles */
-.edit-modal-overlay {
-  backdrop-filter: blur(4px);
-}
-
-.edit-modal {
-  animation: modalSlideIn 0.3s ease-out;
-}
-
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-/* Action Buttons */
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.action-btn {
-  padding: 0.375rem 0.75rem;
-  border-radius: 0.375rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  border: none;
-  cursor: pointer;
-}
-
-.action-btn.edit {
-  background: #2563eb;
+/* Card header gradient - Not available in Tailwind */
+.card-header {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
 }
 
-.action-btn.edit:hover {
-  background: #1d4ed8;
+/* Custom status badge colors - Only colors not in standard Tailwind */
+.status-completed {
+  background: #dcfce7;
+  color: #166534;
 }
 
-.action-btn.delete {
-  background: #dc2626;
-  color: white;
+.status-pending {
+  background: #fef3c7;
+  color: #92400e;
 }
 
-.action-btn.delete:hover {
-  background: #b91c1c;
+.status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
-/* Modal Form Styles */
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 0.5rem;
-}
-
-.form-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-textarea {
-  resize: vertical;
-  min-height: 6rem;
-}
-
-.form-select {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: 1.5em 1.5em;
-  padding-right: 2.5rem;
-}
-
-/* Modal Footer */
-.modal-footer {
-  border-top: 1px solid #e5e7eb;
-  background: #f9fafb;
-}
-
-.modal-footer .btn {
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  border: none;
-  cursor: pointer;
-}
-
-.modal-footer .btn.cancel {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
-}
-
-.modal-footer .btn.cancel:hover {
-  background: #e5e7eb;
-}
-
-.modal-footer .btn.save {
-  background: #3b82f6;
-  color: white;
-}
-
-.modal-footer .btn.save:hover {
-  background: #2563eb;
-}
-
-/* Print Styles */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-
-  .consultation-card {
-    break-inside: avoid;
-    margin-bottom: 1rem;
-  }
-
-  .card-header {
-    background: #1f2937 !important;
-    -webkit-print-color-adjust: exact;
-    color-adjust: exact;
-  }
-}
+/* Print Styles - Not needed for this component */

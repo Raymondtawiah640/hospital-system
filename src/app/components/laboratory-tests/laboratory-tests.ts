@@ -101,13 +101,26 @@ export class LaboratoryTests implements OnInit {
   // Fetch patients from the API
   fetchPatients(): void {
     const apiUrl = 'https://kilnenterprise.com/presbyterian-hospital/get-patients.php';
-    this.http.get<Patient[]>(apiUrl).subscribe(
-      (data) => {
-        this.patients = data;
-        this.filteredPatients = data; // Initialize the filtered list
+    this.http.get<any>(apiUrl).subscribe(
+      (response) => {
+        if (response.success && response.patients) {
+          this.patients = response.patients;
+          this.filteredPatients = response.patients; // Initialize the filtered list
+        } else if (Array.isArray(response)) {
+          // Handle case where API returns array directly
+          this.patients = response;
+          this.filteredPatients = response;
+        } else {
+          this.patients = [];
+          this.filteredPatients = [];
+          this.errorMessage = '❌ Invalid response format from patients API.';
+        }
       },
       (error) => {
-        this.errorMessage = '❌ Error fetching patients.';
+        console.error('Patients API Error:', error);
+        this.errorMessage = '❌ Error fetching patients. Please check your connection.';
+        this.patients = [];
+        this.filteredPatients = [];
       }
     );
   }

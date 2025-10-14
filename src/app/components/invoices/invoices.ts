@@ -35,11 +35,40 @@ export class Invoices implements OnInit, OnDestroy {
 
   // Modal related
   showViewModal: boolean = false;
-  showDeleteModal: boolean = false;
   selectedInvoice: any = null;
   prescriptions: any[] = [];
+  doctors: any[] = [];
+
+  // Monthly/Yearly tracking for anti-cheating
+  monthlyTotals: { [key: string]: { month: string; year: number; total: number; count: number } } = {};
+  yearlyTotals: { [key: string]: { year: number; total: number; count: number } } = {};
+  recordsSaved: boolean = false;
+
 
   constructor(private http: HttpClient, private authService: AuthService, private router: Router) {}
+
+  // Load doctor data for name resolution
+  loadDoctors(): void {
+    const apiUrl = 'https://kilnenterprise.com/presbyterian-hospital/get-doctor.php';
+    this.http.get<any>(apiUrl).subscribe(
+      (response) => {
+        if (response.success && response.doctors) {
+          this.doctors = response.doctors;
+        } else if (Array.isArray(response)) {
+          this.doctors = response;
+        } else {
+          this.doctors = [];
+        }
+        // Load invoices after doctors are loaded
+        this.fetchInvoices();
+      },
+      (error) => {
+        this.doctors = [];
+        // Still load invoices even if doctors fail
+        this.fetchInvoices();
+      }
+    );
+  }
 
   // Method to set success message with auto-hide
   private setSuccessMessage(message: string): void {
@@ -78,7 +107,7 @@ export class Invoices implements OnInit, OnDestroy {
     if (!this.isLoggedIn) {
       this.router.navigate(['/login']);
     } else {
-      this.fetchInvoices();
+      this.loadDoctors();
     }
   }
 
@@ -116,6 +145,108 @@ export class Invoices implements OnInit, OnDestroy {
     this.paidInvoices = this.invoices.filter(b => b.status === 'paid').length;
     this.pendingInvoices = this.invoices.filter(b => b.status === 'pending').length;
     this.overdueInvoices = this.invoices.filter(b => b.status === 'overdue').length;
+    this.calculateMonthlyTotals();
+    this.calculateYearlyTotals();
+  }
+
+  // Calculate totals by month for anti-cheating records
+  calculateMonthlyTotals(): void {
+    this.monthlyTotals = {};
+    this.invoices.forEach(invoice => {
+      const date = new Date(invoice.date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+      if (!this.monthlyTotals[monthKey]) {
+        this.monthlyTotals[monthKey] = {
+          month: monthName,
+          year: date.getFullYear(),
+          total: 0,
+          count: 0
+        };
+      }
+
+      const amount = parseFloat(invoice.amount) || 0;
+      this.monthlyTotals[monthKey].total += amount;
+      this.monthlyTotals[monthKey].count += 1;
+    });
+  }
+
+  // Calculate totals by year for anti-cheating records
+  calculateYearlyTotals(): void {
+    this.yearlyTotals = {};
+    this.invoices.forEach(invoice => {
+      const date = new Date(invoice.date);
+      const yearKey = date.getFullYear().toString();
+
+      if (!this.yearlyTotals[yearKey]) {
+        this.yearlyTotals[yearKey] = {
+          year: date.getFullYear(),
+          total: 0,
+          count: 0
+        };
+      }
+
+      const amount = parseFloat(invoice.amount) || 0;
+      this.yearlyTotals[yearKey].total += amount;
+      this.yearlyTotals[yearKey].count += 1;
+    });
+  }
+
+  // Save monthly/yearly records to prevent cheating
+  saveFinancialRecords(): void {
+    if (this.recordsSaved) {
+      this.setErrorMessage('Records have already been saved for this period.');
+      return;
+    }
+
+    const records = {
+      monthly: Object.values(this.monthlyTotals),
+      yearly: Object.values(this.yearlyTotals),
+      savedDate: new Date().toISOString(),
+      totalInvoices: this.totalInvoices,
+      savedBy: 'system' // In a real app, this would be the logged-in user
+    };
+
+    const apiUrl = 'https://kilnenterprise.com/presbyterian-hospital/save-financial-records.php';
+    this.http.post<any>(apiUrl, records).subscribe(
+      (response) => {
+        if (response.success) {
+          this.recordsSaved = true;
+          this.setSuccessMessage('Financial records saved successfully. Records are now immutable.');
+        } else {
+          this.setErrorMessage(response.message || 'Error saving financial records.');
+        }
+      },
+      (error) => {
+        this.setErrorMessage('Error saving financial records. Please try again.');
+      }
+    );
+  }
+
+  // Get monthly total for a specific month
+  getMonthlyTotal(monthKey: string): number {
+    return this.monthlyTotals[monthKey]?.total || 0;
+  }
+
+  // Get yearly total for a specific year
+  getYearlyTotal(year: number): number {
+    return this.yearlyTotals[year.toString()]?.total || 0;
+  }
+
+
+  // Helper method to get monthly totals as array for template
+  getMonthlyTotalsArray(): any[] {
+    return Object.values(this.monthlyTotals).sort((a, b) => {
+      const aDate = new Date(a.year, parseInt(a.month.split('-')[0]) - 1);
+      const bDate = new Date(b.year, parseInt(b.month.split('-')[0]) - 1);
+      return bDate.getTime() - aDate.getTime(); // Most recent first
+    });
+  }
+
+  // Helper method to get yearly totals as array for template
+  getYearlyTotalsArray(): any[] {
+    return Object.values(this.yearlyTotals).sort((a, b) => b.year - a.year); // Most recent first
   }
 
   filterInvoices(): void {
@@ -160,18 +291,37 @@ export class Invoices implements OnInit, OnDestroy {
 
   viewInvoice(invoice: any): void {
     this.selectedInvoice = invoice;
+    this.prescriptions = []; // Clear previous prescriptions
     this.fetchPrescriptions(invoice.patient_name);
     this.showViewModal = true;
   }
 
   fetchPrescriptions(patientName: string): void {
-    const apiUrl = `https://kilnenterprise.com/presbyterian-hospital/prescriptions.php?patient_name=${encodeURIComponent(patientName)}`;
-    this.http.get<any>(apiUrl).subscribe(
+    // Use the same simple approach as pharmacy stock component
+    const apiUrl = 'https://kilnenterprise.com/presbyterian-hospital/prescriptions.php?all=true';
+    this.http.get<any[]>(apiUrl).subscribe(
       (response) => {
-        if (Array.isArray(response) && response.length > 0 && response[0].prescriptions) {
-          this.prescriptions = response[0].prescriptions;
-        } else if (response.success && response.prescriptions) {
-          this.prescriptions = response.prescriptions;
+        if (Array.isArray(response)) {
+          // Find the patient group that matches the requested patient name
+          const patientGroup = response.find((group: any) => {
+            return group.patient_name && patientName &&
+                   group.patient_name.toLowerCase() === patientName.toLowerCase();
+          });
+
+          if (patientGroup && patientGroup.prescriptions) {
+            // Resolve doctor names if they're in "Doctor [ID]" format
+            if (patientGroup.doctor_name && patientGroup.doctor_name.startsWith('Doctor ')) {
+              const doctorId = parseInt(patientGroup.doctor_name.split(' ')[1]);
+              const doctor = this.doctors.find(d => d.id == doctorId || d.doctor_id == doctorId);
+              if (doctor) {
+                patientGroup.doctor_name = doctor.first_name + ' ' + doctor.last_name;
+              }
+            }
+
+            this.prescriptions = patientGroup.prescriptions;
+          } else {
+            this.prescriptions = [];
+          }
         } else {
           this.prescriptions = [];
         }
@@ -182,30 +332,6 @@ export class Invoices implements OnInit, OnDestroy {
     );
   }
 
-  deleteInvoice(invoice: any): void {
-    this.selectedInvoice = invoice;
-    this.showDeleteModal = true;
-  }
-
-  confirmDelete(): void {
-    const apiUrl = 'https://kilnenterprise.com/presbyterian-hospital/delete-bill.php';
-    this.http.delete<any>(apiUrl, { body: { id: this.selectedInvoice.id } }).subscribe(
-      (response) => {
-        if (response.success) {
-          this.fetchInvoices();
-          this.closeModals();
-          this.setSuccessMessage('Invoice deleted successfully');
-        } else {
-          this.setErrorMessage(response.message);
-          this.closeModals();
-        }
-      },
-      (error) => {
-        this.setErrorMessage('Error deleting invoice.');
-        this.closeModals();
-      }
-    );
-  }
 
   printInvoice(): void {
     if (this.selectedInvoice) {
@@ -305,7 +431,6 @@ export class Invoices implements OnInit, OnDestroy {
 
   closeModals(): void {
     this.showViewModal = false;
-    this.showDeleteModal = false;
     this.selectedInvoice = null;
   }
 }

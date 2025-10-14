@@ -52,9 +52,9 @@
 
         <!-- Blood Group -->
         <div>
-          <label class="block text-gray-700 font-semibold mb-2">Blood Group <span [class.text-red-500]="!bloodGroupModel?.valid" [class.text-green-500]="bloodGroupModel?.valid">*</span></label>
+          <label class="block text-gray-700 font-semibold mb-2">Blood Group</label>
           <select #bloodGroupModel="ngModel" [(ngModel)]="bloodGroup" name="bloodGroup"
-            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
             <option value="">Select blood group</option>
             <option>A+</option>
             <option>A-</option>
@@ -80,16 +80,16 @@
 
         <!-- Email -->
         <div>
-          <label class="block text-gray-700 font-semibold mb-2">Email <span [class.text-red-500]="!emailModel?.valid" [class.text-green-500]="emailModel?.valid">*</span></label>
+          <label class="block text-gray-700 font-semibold mb-2">Email</label>
           <input #emailModel="ngModel" type="email" [(ngModel)]="email" name="email" placeholder="patient@example.com"
-            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
         </div>
 
         <!-- Address -->
         <div class="md:col-span-2">
-          <label class="block text-gray-700 font-semibold mb-2">Residential Address <span [class.text-red-500]="!residentialAddrModel?.valid" [class.text-green-500]="residentialAddrModel?.valid">*</span></label>
+          <label class="block text-gray-700 font-semibold mb-2">Residential Address</label>
           <textarea #residentialAddrModel="ngModel" rows="2" [(ngModel)]="residentialAddr" name="residentialAddr" placeholder="Enter address"
-            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required></textarea>
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
         </div>
       </div>
 

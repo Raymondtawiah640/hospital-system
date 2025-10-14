@@ -101,7 +101,7 @@ export class GeneralDepartment implements OnInit {
  // Required fields for each section
  requiredFieldsBySection = {
    'patient-info': ['patientId', 'patientName', 'age', 'gender'],
-   'consultation': ['chiefComplaint'],
+   'consultation': ['chiefComplaint', 'selectedDoctorId'], // Added selectedDoctorId as required
    'vitals': [], // Optional fields in vitals section
    'examination': [], // Optional fields in examination section
    'treatment': ['diagnosis'] // Only diagnosis is required in treatment
@@ -352,6 +352,8 @@ export class GeneralDepartment implements OnInit {
        html::after, body::after { content: "" !important; display: none !important; }
        *[class*="url"], *[id*="url"] { display: none !important; }
        footer, .footer { display: none !important; }
+       /* Hide any URLs that might appear in print */
+       /* Additional print styles can be added here if needed */
      }
    `;
    document.head.appendChild(style);

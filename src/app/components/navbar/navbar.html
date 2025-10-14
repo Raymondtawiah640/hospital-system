@@ -23,7 +23,6 @@
           <div *ngIf="openDropdown === 'patients'" class="absolute left-0 flex flex-col bg-white text-black mt-2 rounded shadow-lg w-44 z-50">
             <a routerLink="/all-patients" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">All Patients</a>
             <a routerLink="/add-patient" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Add Patient</a>
-            <a routerLink="/patient-records" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Patient Records</a>
           </div>
         </div>
 
@@ -79,19 +78,6 @@
           </div>
         </div>
 
-        <!-- Departments Dropdown -->
-        <div class="relative" (mouseenter)="openDropdownMenu('departments')" (mouseleave)="closeDropdownMenu()">
-          <button class="hover:text-green-400 flex items-center">
-            Departments <span class="ml-1">▾</span>
-          </button>
-          <div *ngIf="openDropdown === 'departments'" class="absolute left-0 flex flex-col bg-white text-black mt-2 rounded shadow-lg w-44 z-50">
-            <a routerLink="/general-department" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">General Department</a>
-            <a routerLink="/cardiology" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Cardiology</a>
-            <a routerLink="/pediatrics" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Pediatrics</a>
-            <a routerLink="/emergency" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Emergency</a>
-          </div>
-        </div>
-
         <!-- Reports Dropdown -->
         <div class="relative" (mouseenter)="openDropdownMenu('reports')" (mouseleave)="closeDropdownMenu()">
           <button class="hover:text-green-400 flex items-center">
@@ -102,7 +88,8 @@
             <a *ngIf="isAdmin" routerLink="/monthly-reports" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Monthly Reports</a>
             <a *ngIf="isAdmin" routerLink="/annual-reports" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Annual Reports</a>
             <a *ngIf="isAdmin" routerLink="/authenticate" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Authenticate</a>
-             <a *ngIf="isAdmin" routerLink="/result" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">General Department Result</a>
+            <a *ngIf="isAdmin" routerLink="/general-department" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">General Department</a>
+            <a *ngIf="isAdmin" routerLink="/result" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">General Department Result</a>
           </div>
         </div>
 
@@ -140,10 +127,25 @@
 
       <!-- Mobile Menu -->
       <div *ngIf="menuOpen" class="md:hidden bg-blue-700 text-white w-full absolute top-16 left-0 z-50 shadow-lg">
+        <!-- Auth Section for Mobile - Moved to Top -->
+        <div class="px-4 py-2 border-b border-blue-600">
+          <ng-container *ngIf="isLoggedIn; else mobileGuestLinks">
+            <!-- Profile Section for Mobile -->
+            <div class="flex items-center space-x-2">
+              <img src="user.png" alt="Profile" class="w-6 h-6 rounded-full">
+              <span class="text-sm">Profile</span>
+            </div>
+          </ng-container>
+          <ng-template #mobileGuestLinks>
+            <a routerLink="/login" (click)="closeMenu()" class="block hover:bg-blue-600 py-1">
+              <span class="text-sm">🔓 Login</span>
+            </a>
+          </ng-template>
+        </div>
+
         <a routerLink="/dashboard" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">Dashboard</a>
         <a routerLink="/all-patients" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">All Patients</a>
         <a routerLink="/add-patient" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">Add Patient</a>
-        <a routerLink="/patient-records" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">Patient Records</a>
         <a routerLink="/all-doctors" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">All Doctors</a>
         <a *ngIf="isAdmin" routerLink="/add-doctor" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">Add Doctor</a>
         <a *ngIf="isAdmin" routerLink="/schedules" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">Schedules</a>
@@ -158,13 +160,12 @@
         <a *ngIf="isAdmin || isFinance" routerLink="/invoices" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">Invoices</a>
         <a routerLink="/medical-records" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">Medical Records</a>
         <a routerLink="/general-department" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">General Department</a>
-        <a routerLink="/cardiology" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">Cardiology</a>
-        <a routerLink="/pediatrics" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">Pediatrics</a>
-        <a routerLink="/emergency" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">Emergency</a>
         <a *ngIf="isAdmin" routerLink="/daily-reports" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">Daily Reports</a>
         <a *ngIf="isAdmin" routerLink="/monthly-reports" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">Monthly Reports</a>
         <a *ngIf="isAdmin" routerLink="/annual-reports" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">Annual Reports</a>
         <a *ngIf="isAdmin" routerLink="/authenticate" (click)="closeMenu()" class="block px-4 py-2 hover:bg-blue-600">Authenticate</a>
+        <a *ngIf="isAdmin" routerLink="/general-department" (click)="closeMenu()" class="block px-4 py-2 hover:bg-green-100">General Department</a>
+        <a *ngIf="isAdmin" routerLink="/result" (click)="closeMenu()" class="block px-4 py-2 hover:bg-green-100">General Department Result</a>
       </div>
     </div>
   </div>

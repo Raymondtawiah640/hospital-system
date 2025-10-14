@@ -43,12 +43,17 @@ export class PharmacyStock implements OnInit {
   errorMessage: string = '';
   successMessage: string = '';
   searchTerm: string = '';
+  prescriptionSearchTerm: string = '';
+  medicineSearchTerm: string = '';
   isLoggedIn: boolean = false;
 
   // Modal related
   showViewModal: boolean = false;
   showDeleteModal: boolean = false;
   selectedPrescription: any = null;
+
+  // Doctor data for name resolution
+  doctors: any[] = [];
 
   constructor(private http: HttpClient, private authService: AuthService, private router: Router) {}
 
@@ -80,12 +85,51 @@ export class PharmacyStock implements OnInit {
     if (!this.isLoggedIn) {
       this.router.navigate(['/login']);
     } else {
-      this.fetchPrescriptionsForPharmacist();
-      this.fetchBills();
-      this.fetchMedicines();
+      this.loadDoctors();
     }
   }
 
+
+  // Load doctor data for name resolution
+  loadDoctors(): void {
+    this.http.get('https://kilnenterprise.com/presbyterian-hospital/get-doctor.php')
+      .subscribe({
+        next: (response: any) => {
+          // Handle both array response and object response with doctors property
+          if (Array.isArray(response)) {
+            this.doctors = response;
+          } else if (response && response.doctors) {
+            this.doctors = response.doctors;
+          } else {
+            this.doctors = [];
+          }
+          // Load other data after doctors are loaded
+          this.fetchPrescriptionsForPharmacist();
+          this.fetchBills();
+          this.fetchMedicines();
+        },
+        error: (err) => {
+          console.error('Error loading doctors:', err);
+          this.doctors = [];
+          // Still load other data even if doctors fail to load
+          this.fetchPrescriptionsForPharmacist();
+          this.fetchBills();
+          this.fetchMedicines();
+        }
+      });
+  }
+
+  // Get doctor name by ID
+  getDoctorName(doctorId: string): string {
+    if (!doctorId) return 'Unknown Doctor';
+
+    const doctor = this.doctors.find(d => d.doctor_id === doctorId || d.id === doctorId);
+    if (doctor) {
+      return `${doctor.first_name} ${doctor.last_name}`;
+    }
+
+    return 'Unknown Doctor';
+  }
 
   // Pharmacist methods
   fetchPrescriptionsForPharmacist(): void {
@@ -94,12 +138,35 @@ export class PharmacyStock implements OnInit {
     this.http.get<any[]>(apiUrl).subscribe(
       (response) => {
         this.isLoading = false;
-        this.prescriptions = response || [];
+
+        console.log('Pharmacy Prescriptions API Response:', response);
+
+        // The API returns grouped prescriptions by patient directly as an array
+        if (Array.isArray(response)) {
+          this.prescriptions = response.map((group: any) => {
+            // Resolve doctor names if they're in "Doctor [ID]" format
+            if (group.doctor_name && group.doctor_name.startsWith('Doctor ')) {
+              const doctorId = parseInt(group.doctor_name.split(' ')[1]);
+              const doctor = this.doctors.find(d => d.id == doctorId || d.doctor_id == doctorId);
+              if (doctor) {
+                group.doctor_name = doctor.first_name + ' ' + doctor.last_name;
+              }
+            }
+            return group;
+          });
+        } else {
+          this.prescriptions = [];
+        }
+
         this.filteredPrescriptions = this.prescriptions;
+        console.log('Processed pharmacy prescriptions:', this.prescriptions.length, 'patient groups');
       },
       (error) => {
         this.isLoading = false;
+        console.error('Error fetching prescriptions:', error);
         this.setErrorMessage('Failed to fetch prescriptions');
+        this.prescriptions = [];
+        this.filteredPrescriptions = [];
       }
     );
   }
@@ -173,12 +240,20 @@ export class PharmacyStock implements OnInit {
   }
 
   filterPrescriptions(): void {
-    if (!this.searchTerm) {
+    if (!this.prescriptionSearchTerm) {
       this.filteredPrescriptions = this.prescriptions;
     } else {
       this.filteredPrescriptions = this.prescriptions.filter((prescription: any) => {
         const searchStr = `${prescription.patient_name} ${prescription.doctor_name}`.toLowerCase();
-        return searchStr.includes(this.searchTerm.toLowerCase());
+        const searchTermLower = this.prescriptionSearchTerm.toLowerCase();
+
+        // Check if search term matches patient name, doctor name, or any medicine in the prescription
+        const matchesBasic = searchStr.includes(searchTermLower);
+        const matchesMedicines = prescription.prescriptions?.some((med: any) =>
+          med.medicine_name?.toLowerCase().includes(searchTermLower)
+        );
+
+        return matchesBasic || matchesMedicines;
       });
     }
   }
@@ -186,6 +261,16 @@ export class PharmacyStock implements OnInit {
   ngDoCheck(): void {
     this.filterPrescriptions();
     this.filterMedicines();
+  }
+
+  // Clear prescription search
+  clearPrescriptionSearch(): void {
+    this.prescriptionSearchTerm = '';
+  }
+
+  // Clear medicine search
+  clearMedicineSearch(): void {
+    this.medicineSearchTerm = '';
   }
 
   // Medicine management methods
@@ -228,12 +313,18 @@ export class PharmacyStock implements OnInit {
   }
 
   filterMedicines(): void {
-    if (!this.searchTerm) {
+    if (!this.medicineSearchTerm) {
       this.filteredMedicines = this.medicines;
     } else {
       this.filteredMedicines = this.medicines.filter((medicine: any) => {
         const searchStr = `${medicine.name} ${medicine.description || ''}`.toLowerCase();
-        return searchStr.includes(this.searchTerm.toLowerCase());
+        const searchTermLower = this.medicineSearchTerm.toLowerCase();
+
+        // Enhanced search: name, description, and price
+        const matchesBasic = searchStr.includes(searchTermLower);
+        const matchesPrice = medicine.price?.toString().includes(searchTermLower);
+
+        return matchesBasic || matchesPrice;
       });
     }
   }
@@ -347,6 +438,22 @@ export class PharmacyStock implements OnInit {
     this.showViewModal = false;
     this.showDeleteModal = false;
     this.selectedMedicine = null;
+  }
+
+  // Clear search
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.filteredPrescriptions = this.prescriptions;
+    this.filteredMedicines = this.medicines;
+  }
+
+  // Get search results count
+  getPrescriptionResultsCount(): number {
+    return this.filteredPrescriptions.length;
+  }
+
+  getMedicineResultsCount(): number {
+    return this.filteredMedicines.length;
   }
 
   prevPage(): void {
