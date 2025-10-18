@@ -1,0 +1,75 @@
+/* Basic responsive styles for All Patients component */
+
+/* Mobile responsive design */
+@media (max-width: 768px) {
+  /* Make table responsive with horizontal scroll */
+  .min-w-full {
+    min-width: 600px; /* Ensure table doesn't get too cramped */
+  }
+
+  /* Adjust padding for mobile */
+  .p-4 {
+    padding: 0.75rem;
+  }
+
+  .p-2 {
+    padding: 0.5rem;
+  }
+
+  /* Smaller text on mobile */
+  .text-xl {
+    font-size: 1.125rem;
+  }
+
+  .text-lg {
+    font-size: 1rem;
+  }
+
+  /* Responsive search input */
+  input[type="text"] {
+    width: 100% !important;
+    max-width: 300px;
+  }
+
+  /* Modal responsive adjustments */
+  .max-w-4xl {
+    max-width: 95vw;
+    margin: 0.5rem;
+  }
+
+  .text-2xl {
+    font-size: 1.5rem;
+  }
+
+  /* Grid responsiveness */
+  .lg\:grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Medium padding for tablets */
+  .p-4 {
+    padding: 1rem;
+  }
+
+  /* Slightly smaller modal on tablets */
+  .max-w-4xl {
+    max-width: 90vw;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger buttons for touch */
+  button {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+  }
+
+  /* Remove hover effects that don't work on touch */
+  .hover\:bg-gray-100:hover {
+    background-color: inherit;
+  }
+}

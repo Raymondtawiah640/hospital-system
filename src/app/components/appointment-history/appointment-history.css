@@ -1,0 +1,80 @@
+/* Basic responsive styles for Appointment History component */
+
+/* Mobile responsive design */
+@media (max-width: 768px) {
+  /* Make table responsive with horizontal scroll */
+  .min-w-full {
+    min-width: 700px; /* Ensure table doesn't get too cramped */
+  }
+
+  /* Adjust padding for mobile */
+  .p-4 {
+    padding: 0.75rem;
+  }
+
+  .p-2 {
+    padding: 0.5rem;
+  }
+
+  /* Smaller text on mobile */
+  .text-xl {
+    font-size: 1.125rem;
+  }
+
+  .text-lg {
+    font-size: 1rem;
+  }
+
+  /* Responsive search input */
+  input[type="text"] {
+    width: 100% !important;
+    max-width: 300px;
+  }
+
+  /* Mobile card styling */
+  .bg-white {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Mobile button styling */
+  button {
+    min-height: 44px;
+    font-size: 0.875rem;
+  }
+
+  /* Grid responsiveness */
+  .lg\:hidden {
+    display: none;
+  }
+
+  .lg\:block {
+    display: block;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Medium padding for tablets */
+  .p-4 {
+    padding: 1rem;
+  }
+
+  /* Slightly smaller icons on tablets */
+  .w-12 {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .w-10 {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 1025px) {
+  /* Desktop-optimized layout */
+  .bg-white {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
