@@ -84,14 +84,12 @@ export class Login implements OnInit {
 
   // Password validation methods
   onPasswordInput(): void {
-    console.log('Password input changed:', this.password);
     this.showPasswordValidation = this.password.length > 0;
     this.validatePassword();
   }
 
   validatePassword(): void {
     const password = this.password || '';
-    console.log('Validating password:', password);
 
     // Check each requirement
     this.passwordValidation.hasMinLength = password.length >= 8;
@@ -108,8 +106,6 @@ export class Login implements OnInit {
                                       this.passwordValidation.hasUppercase &&
                                       this.passwordValidation.hasNumber &&
                                       this.passwordValidation.hasSpecialChar;
-
-    console.log('Password validation results:', this.passwordValidation);
 
     // Update strength message
     this.updatePasswordStrengthMessage();
@@ -216,7 +212,6 @@ export class Login implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
-        console.error('Login error:', err);
 
         // Check if this is a "no password" scenario
         if (err.status === 404 || (err.error && err.error.message && err.error.message.includes('not found'))) {

@@ -1,11 +1,4 @@
 <?php
-// ----------------- DEBUG & ERROR -----------------
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-ini_set('log_errors', 1);
-ini_set('error_log', '/var/log/apache2/php_errors.log');
-error_reporting(E_ALL);
-
 // ----------------- HEADERS -----------------
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Origin: *");
@@ -20,7 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // ----------------- SESSION -----------------
 if (session_status() === PHP_SESSION_NONE) {
     if (!session_start()) {
-        error_log("DEBUG: Failed to start session");
         http_response_code(500);
         echo json_encode(["success" => false, "message" => "❌ Failed to start session."]);
         exit;
@@ -30,7 +22,6 @@ if (session_status() === PHP_SESSION_NONE) {
 // ----------------- DB CONNECTION -----------------
 require_once 'db_connect.php';
 if (!isset($pdo)) {
-    error_log("DEBUG: PDO not set after db_connect.php");
     http_response_code(500);
     echo json_encode(["success" => false, "message" => "❌ Database connection missing."]);
     exit;
@@ -39,7 +30,6 @@ if (!isset($pdo)) {
 // ----------------- INPUT -----------------
 $inputJSON = file_get_contents("php://input");
 if ($inputJSON === false) {
-    error_log("DEBUG: Failed to read php://input");
     http_response_code(400);
     echo json_encode(["success" => false, "message" => "❌ Failed to read request data."]);
     exit;
@@ -47,7 +37,6 @@ if ($inputJSON === false) {
 
 $input = json_decode($inputJSON, true);
 if ($input === null) {
-    error_log("DEBUG: JSON decode failed: " . json_last_error_msg());
     http_response_code(400);
     echo json_encode(["success" => false, "message" => "❌ Invalid JSON input."]);
     exit;
@@ -117,12 +106,10 @@ try {
 
 } catch (PDOException $e) {
     // Handle database errors
-    error_log("DB ERROR in login.php: " . $e->getMessage());
     http_response_code(500);
     echo json_encode(["success" => false, "message" => "❌ Server error. Please try again later."]);
 } catch (Exception $e) {
     // Handle general errors
-    error_log("GENERAL ERROR in login.php: " . $e->getMessage());
     http_response_code(500);
     echo json_encode(["success" => false, "message" => "❌ Server error. Please try again later."]);
 }
