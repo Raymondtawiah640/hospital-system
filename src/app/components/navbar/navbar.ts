@@ -25,6 +25,7 @@ export class Navbar {
   // Close mobile menu
   closeMenu(): void {
     this.menuOpen = false;
+    this.openDropdown = null; // Also close any open dropdowns
   }
 
   // Open dropdown immediately
@@ -49,6 +50,18 @@ export class Navbar {
   navigateAndClose(): void {
     this.closeMenu();
     this.openDropdown = null;
+  }
+
+  // Handle clicks outside mobile menu to close it
+  onOutsideClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    const navbar = target.closest('nav');
+    const mobileMenu = target.closest('.md\\:hidden');
+
+    // If clicking outside navbar or mobile menu, close mobile menu
+    if (!navbar && this.menuOpen) {
+      this.closeMenu();
+    }
   }
 
   // Auth helpers

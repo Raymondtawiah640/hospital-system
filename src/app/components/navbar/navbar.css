@@ -1,3 +1,78 @@
+/* Navbar responsive styles */
+
+/* Mobile menu styling */
+@media (max-width: 768px) {
+  /* Ensure mobile menu appears properly */
+  .md\\:hidden {
+    position: relative;
+  }
+
+  /* Mobile menu dropdown */
+  .md\\:hidden > div {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: inherit;
+    z-index: 50;
+  }
+
+  /* Mobile menu button styling */
+  button:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+  }
+
+  /* Ensure mobile menu items are clickable */
+  .md\\:hidden a {
+    display: block;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .md\\:hidden a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Profile section in mobile menu */
+  .md\\:hidden .border-b {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* Tablet and desktop styles */
+@media (min-width: 769px) {
+  /* Ensure desktop navigation works properly */
+  .hidden.md\\:flex {
+    display: flex !important;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets for mobile */
+  .md\\:hidden a {
+    padding: 1rem;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Remove hover effects on touch devices */
+  .md\\:hidden a:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* Ensure navbar stays visible during navigation */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
 /* Hide navbar when printing */
 @media print {
   nav {

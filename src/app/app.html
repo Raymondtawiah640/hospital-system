@@ -1,4 +1,4 @@
-<div class="min-h-screen flex flex-col">
+<div class="min-h-screen flex flex-col w-full">
   <!-- Loading overlay - appears above everything -->
   <app-loading [isLoading]="isAppLoading"></app-loading>
 
@@ -6,7 +6,7 @@
   <app-navbar></app-navbar>
 
   <!-- Main content -->
-  <main class="flex-1">
+  <main class="flex-1 w-full">
     <router-outlet></router-outlet>
   </main>
 

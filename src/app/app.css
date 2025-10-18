@@ -1,0 +1,109 @@
+/* Global app styles to ensure full width on mobile */
+
+/* Reset and ensure full width */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow-x: hidden !important; /* Prevent horizontal scroll */
+  box-sizing: border-box;
+}
+
+/* Ensure app-root takes full width */
+app-root {
+  width: 100% !important;
+  min-height: 100vh !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ensure all containers take full width */
+div[class*="container"], div[class*="max-w"], main, nav {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Remove any default margins that might cause spacing */
+* {
+  box-sizing: border-box;
+}
+
+/* Ensure full viewport width */
+body {
+  width: 100vw;
+  position: relative;
+}
+
+/* Mobile-specific fixes */
+@media (max-width: 768px) {
+  /* Force full viewport width on mobile */
+  html, body, app-root, .min-h-screen {
+    width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Remove any container margins that create space */
+  .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* Ensure navbar takes full width */
+  nav {
+    width: 100vw !important;
+    margin: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+  }
+
+  /* Fix component spacing - ensure no right margin */
+  .px-4, .px-6, .px-8 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* Ensure main content takes full width */
+  main {
+    width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Fix any flex containers that might not be full width */
+  .flex {
+    width: 100% !important;
+  }
+
+  /* Override any Tailwind responsive classes that might cause issues */
+  .sm\:px-6, .md\:px-8, .lg\:px-8 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Ensure proper width on tablets */
+  .min-h-screen {
+    width: 100% !important;
+  }
+
+  .max-w-7xl {
+    width: 100% !important;
+  }
+}
+
+/* Desktop - ensure no width issues */
+@media (min-width: 1025px) {
+  /* Standard desktop layout */
+  .min-h-screen {
+    width: 100%;
+  }
+}
