@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardHighlight } from '../dashboard-highlight/dashboard-highlight';
 import { DashboardSummary } from '../dashboard-summary/dashboard-summary';
+import { Customer } from '../customer/customer';
 
 interface Slide {
   image: string;
@@ -13,7 +14,7 @@ interface Slide {
   selector: 'app-dashboard',
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
-  imports: [CommonModule, DashboardHighlight, DashboardSummary],
+  imports: [CommonModule, DashboardHighlight, DashboardSummary, Customer],
 })
 export class Dashboard implements OnInit {
   slides: Slide[] = [

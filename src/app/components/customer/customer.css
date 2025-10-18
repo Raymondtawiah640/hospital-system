@@ -1,0 +1,303 @@
+/* Modern testimonial animations with enhanced effects */
+.testimonial-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+  z-index: 1;
+}
+
+/* Active testimonial styling */
+.testimonial-item.active {
+  opacity: 1 !important;
+  transform: translateY(0) scale(1) !important;
+  z-index: 10;
+}
+
+/* Ensure all testimonials are properly positioned */
+.testimonial-item * {
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* Enhanced dot animations */
+.testimonial-dot {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.testimonial-dot:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+.testimonial-dot:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Progress dot animations */
+.progress-dot {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-dot.bg-blue-400 {
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+/* Keyframe animations - no overlap */
+@keyframes slideInFromBottom {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideOutToLeft {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateX(-50%) scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-200%) scale(0.8);
+  }
+}
+
+@keyframes progressPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+/* Animation classes */
+.animate-slide-in {
+  animation: slideInFromBottom 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-slide-out {
+  animation: slideOutToLeft 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Glass morphism effects */
+.backdrop-blur-xl {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.backdrop-blur-lg {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Enhanced hover effects */
+.testimonial-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Enhanced Responsive Design */
+
+/* Extra Small Mobile Devices (≤480px) */
+@media (max-width: 480px) {
+  .testimonial-item {
+    margin: 0 8px;
+    padding: 1rem !important;
+    border-radius: 0.75rem !important;
+  }
+
+  .text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .sm\:text-3xl {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+
+  /* Compact spacing on very small screens */
+  .mb-6 {
+    margin-bottom: 1rem;
+  }
+
+  .mb-4 {
+    margin-bottom: 0.75rem;
+  }
+
+  /* Smaller icons on very small screens */
+  .w-12 {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .w-6 {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+/* Small Mobile Devices (481px - 640px) */
+@media (min-width: 481px) and (max-width: 640px) {
+  .testimonial-item {
+    margin: 0 10px;
+    padding: 1.25rem !important;
+    border-radius: 0.875rem !important;
+  }
+
+  .text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+}
+
+/* Tablets (641px - 1024px) */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .testimonial-item {
+    padding: 2rem !important;
+    border-radius: 1rem !important;
+  }
+}
+
+/* Large Screens (≥1025px) */
+@media (min-width: 1025px) {
+  .testimonial-item {
+    padding: 2.5rem !important;
+    border-radius: 1.25rem !important;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets on touch devices */
+  .testimonial-item {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Disable hover effects on touch devices */
+  .testimonial-item:hover {
+    transform: none;
+  }
+}
+
+/* High DPI / Retina Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .backdrop-blur-lg {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* Sharper borders on high DPI */
+  .border-white\/20 {
+    border-width: 0.5px;
+  }
+}
+
+/* Landscape Orientation on Mobile */
+@media (orientation: landscape) and (max-height: 600px) {
+  .min-h-screen {
+    min-height: 100vh;
+  }
+
+  /* Reduce padding in landscape mode */
+  .py-4 {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .py-6 {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  /* Small Tablets */
+  .testimonial-item {
+    padding: 2rem 1.5rem !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Tablets */
+  .testimonial-item {
+    padding: 2.5rem 2rem !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  /* Desktop */
+  .testimonial-item {
+    padding: 3rem 3.5rem !important;
+  }
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  .testimonial-dot:hover {
+    transform: none;
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+
+  .testimonial-dot:active {
+    transform: scale(1.1);
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .backdrop-blur-xl {
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 600px) {
+  .min-h-screen {
+    min-height: 100vh;
+  }
+
+  .py-8 {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
