@@ -16,7 +16,9 @@ export class AddPatient implements OnInit {
   // Model for form data
   firstName: string = '';
   lastName: string = '';
+  idType: string = '';
   ghanaCardNumber: string = '';
+  nhisNumber: string = '';
   dateOfBirth: string = '';
   gender: string = '';
   bloodGroup: string = '';
@@ -25,9 +27,9 @@ export class AddPatient implements OnInit {
   residentialAddr: string = '';
   emergencyName: string = '';
   emergencyPhone: string = '';
-  message: string = '';  
-  isLoading: boolean = false; 
-  isLoggedIn: boolean = false; 
+  message: string = '';
+  isLoading: boolean = false;
+  isLoggedIn: boolean = false;
 
   constructor(private http: HttpClient, private router: Router, private authService: AuthService) {}
 
@@ -45,10 +47,13 @@ export class AddPatient implements OnInit {
         this.isLoading = true; // Start loading
         this.message = '';     // Clear message
 
+        // Determine the ID number based on selection
+        const idNumber = this.idType === 'ghana_card' ? this.ghanaCardNumber : this.nhisNumber;
+
         const patientData = {
           first_name: this.firstName,
           last_name: this.lastName,
-          ghana_card_number: this.ghanaCardNumber,
+          ghana_card_number: idNumber,
           date_of_birth: this.dateOfBirth,
           gender: this.gender,
           blood_group: this.bloodGroup,

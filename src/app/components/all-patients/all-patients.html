@@ -64,7 +64,7 @@
         <h3 class="text-2xl font-bold">Complete Patient Details</h3>
         <button (click)="closeModal()" class="text-white hover:text-gray-200 text-2xl">&times;</button>
       </div>
-      <p class="text-blue-100 mt-2">Patient ID: {{ selectedPatient.id }} | Ghana Card: {{ selectedPatient.ghana_card_number }}</p>
+      <p class="text-blue-100 mt-2">Patient ID: {{ selectedPatient.id }} | ID Number: {{ selectedPatient.ghana_card_number }}</p>
     </div>
 
     <!-- Modal Body -->
@@ -127,7 +127,7 @@
           </h4>
           <div class="space-y-2">
             <p><strong>Patient ID:</strong> <span class="text-gray-700">{{ selectedPatient.id }}</span></p>
-            <p><strong>Ghana Card Number:</strong> <span class="text-gray-700">{{ selectedPatient.ghana_card_number }}</span></p>
+            <p><strong>National ID / NHIS Number:</strong> <span class="text-gray-700">{{ selectedPatient.ghana_card_number }}</span></p>
             <p><strong>Registration Date:</strong> <span class="text-gray-700">{{ selectedPatient.created_at | date:'medium' }}</span></p>
           </div>
         </div>

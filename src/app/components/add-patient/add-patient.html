@@ -24,10 +24,28 @@
             class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
         </div>
 
-        <!-- Ghana Card Number -->
+        <!-- ID Type Selection -->
         <div>
+          <label class="block text-gray-700 font-semibold mb-2">ID Type</label>
+          <select #idTypeModel="ngModel" [(ngModel)]="idType" name="idType"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <option value="">Select ID type</option>
+            <option value="ghana_card">Ghana Card*</option>
+            <option value="nhis">NHIS*</option>
+          </select>
+        </div>
+
+        <!-- Ghana Card Number (shown when Ghana Card is selected) -->
+        <div *ngIf="idType === 'ghana_card'">
           <label class="block text-gray-700 font-semibold mb-2">Ghana Card Number <span [class.text-red-500]="!ghanaCardNumberModel?.valid" [class.text-green-500]="ghanaCardNumberModel?.valid">*</span></label>
           <input #ghanaCardNumberModel="ngModel" type="text" [(ngModel)]="ghanaCardNumber" name="ghanaCardNumber" placeholder="GHA-XXXXXXXXX-X"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+        </div>
+
+        <!-- NHIS Number (shown when NHIS is selected) -->
+        <div *ngIf="idType === 'nhis'">
+          <label class="block text-gray-700 font-semibold mb-2">NHIS Number <span [class.text-red-500]="!nhisNumberModel?.valid" [class.text-green-500]="nhisNumberModel?.valid">*</span></label>
+          <input #nhisNumberModel="ngModel" type="text" [(ngModel)]="nhisNumber" name="nhisNumber" placeholder="Enter NHIS number"
             class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
         </div>
 
