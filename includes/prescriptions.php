@@ -17,15 +17,19 @@ try {
             $all = isset($_GET['all']) ? $_GET['all'] : null;
 
             $sql = "SELECT prescriptions.id, prescriptions.doctor_id, prescriptions.patient_id,
-                           prescriptions.dosage, prescriptions.instructions,
-                           medicines.id as medicine_id, medicines.name AS medicine_name,
-                           medicines.price, medicines.stock_quantity,
-                           COALESCE(CONCAT(patients.first_name, ' ', patients.last_name), CONCAT('Patient ', prescriptions.patient_id)) as patient_name,
-                           COALESCE(CONCAT(doctors.first_name, ' ', doctors.last_name), CONCAT('Doctor ', prescriptions.doctor_id)) as doctor_name
-                     FROM `prescriptions`
-                     JOIN `medicines` ON prescriptions.medicine_id = medicines.id
-                     LEFT JOIN `patients` ON prescriptions.patient_id = patients.id
-                     LEFT JOIN `doctors` ON prescriptions.doctor_id = doctors.doctor_id";
+                            prescriptions.dosage, prescriptions.instructions, prescriptions.illness, prescriptions.prescriber_name,
+                            medicines.id as medicine_id, medicines.name AS medicine_name,
+                            medicines.price, medicines.stock_quantity,
+                            COALESCE(CONCAT(patients.first_name, ' ', patients.last_name), CONCAT('Patient ', prescriptions.patient_id)) as patient_name,
+                            CASE
+                                WHEN prescriptions.prescriber_name IS NOT NULL THEN prescriptions.prescriber_name
+                                WHEN doctors.doctor_id IS NOT NULL THEN CONCAT(doctors.first_name, ' ', doctors.last_name)
+                                ELSE CONCAT('Staff: ', prescriptions.doctor_id)
+                            END as doctor_name
+                      FROM `prescriptions`
+                      JOIN `medicines` ON prescriptions.medicine_id = medicines.id
+                      LEFT JOIN `patients` ON prescriptions.patient_id = patients.id
+                      LEFT JOIN `doctors` ON prescriptions.doctor_id = doctors.doctor_id";
 
             $params = [];
             $conditions = [];
@@ -70,6 +74,7 @@ try {
                     'price' => $prescription['price'],
                     'dosage' => $prescription['dosage'],
                     'instructions' => $prescription['instructions'],
+                    'illness' => $prescription['illness'],
                     'stock_quantity' => $prescription['stock_quantity']
                 ];
                 $grouped_prescriptions[$patient_id]['total_amount'] += $prescription['price'];
@@ -116,16 +121,39 @@ try {
                 }
             }
 
-            // Use default doctor_id if not provided (you may want to get this from session/auth)
-            $doctor_id = $data['doctor_id'] ?? 1; // Default doctor ID
+            // Use doctor_name if provided, otherwise default doctor_id
+            $doctor_id = null;
+            if (isset($data['doctor_name'])) {
+                // Look up doctor by name
+                $stmt = $pdo->prepare("SELECT doctor_id FROM doctors WHERE CONCAT(first_name, ' ', last_name) = ?");
+                $stmt->execute([$data['doctor_name']]);
+                $doctor = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($doctor) {
+                    $doctor_id = $doctor['doctor_id'];
+                } else {
+                    // If doctor not found by name, check if it's an admin/staff member
+                    // For admin users, we can still create prescriptions but use a default doctor_id
+                    // and store the actual prescriber name in a comment or separate field
+                    error_log("Doctor not found by name: " . $data['doctor_name'] . " - using default doctor but noting prescriber");
+                    $doctor_id = 1; // Default to first doctor, but we'll modify the query to handle this
+                }
+            }
 
-            $stmt = $pdo->prepare("INSERT INTO prescriptions (doctor_id, patient_id, medicine_id, dosage, instructions) VALUES (?, ?, ?, ?, ?)");
+            // Fallback to session or default
+            if (!$doctor_id) {
+                session_start();
+                $doctor_id = $_SESSION['doctor_id'] ?? $data['doctor_id'] ?? 1;
+            }
+
+            $stmt = $pdo->prepare("INSERT INTO prescriptions (doctor_id, patient_id, medicine_id, dosage, instructions, illness, prescriber_name) VALUES (?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $doctor_id,
                 $data['patientId'], // Note: frontend sends patientId, not patient_id
                 $medicine_id,
                 $data['dosage'],
-                $data['instructions']
+                $data['instructions'],
+                $data['illness'] ?? null, // Add illness field
+                $data['doctor_name'] ?? null // Store the actual prescriber name
             ]);
 
             echo json_encode(['success' => true, 'message' => 'Prescription created successfully']);
@@ -158,7 +186,12 @@ try {
             break;
     }
 } catch (PDOException $e) {
+    error_log('Prescription API Error: ' . $e->getMessage());
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+} catch (Exception $e) {
+    error_log('Prescription API General Error: ' . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
 }
 ?>

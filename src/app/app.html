@@ -2,14 +2,14 @@
   <!-- Loading overlay - appears above everything -->
   <app-loading [isLoading]="isAppLoading"></app-loading>
 
-  <!-- Navbar always visible -->
-  <app-navbar></app-navbar>
+  <!-- Navbar conditionally visible -->
+  <app-navbar *ngIf="showLayout"></app-navbar>
 
   <!-- Main content -->
   <main class="flex-1 w-full">
     <router-outlet></router-outlet>
   </main>
 
-  <!-- Footer always visible -->
-  <app-footer></app-footer>
+  <!-- Footer conditionally visible -->
+  <app-footer *ngIf="showLayout"></app-footer>
 </div>

@@ -86,6 +86,12 @@ export class PharmacyStock implements OnInit {
       this.router.navigate(['/login']);
     } else {
       this.loadDoctors();
+      // Initial data load - delay to ensure doctors are loaded properly
+      setTimeout(() => {
+        this.fetchPrescriptionsForPharmacist();
+        this.fetchBills();
+        this.fetchMedicines();
+      }, 3000); // Increased to 3 seconds
     }
   }
 
@@ -103,18 +109,9 @@ export class PharmacyStock implements OnInit {
           } else {
             this.doctors = [];
           }
-          // Load other data after doctors are loaded
-          this.fetchPrescriptionsForPharmacist();
-          this.fetchBills();
-          this.fetchMedicines();
         },
         error: (err) => {
-          console.error('Error loading doctors:', err);
           this.doctors = [];
-          // Still load other data even if doctors fail to load
-          this.fetchPrescriptionsForPharmacist();
-          this.fetchBills();
-          this.fetchMedicines();
         }
       });
   }
@@ -135,11 +132,10 @@ export class PharmacyStock implements OnInit {
   fetchPrescriptionsForPharmacist(): void {
     this.isLoading = true;
     const apiUrl = 'https://kilnenterprise.com/presbyterian-hospital/prescriptions.php?all=true';
+
     this.http.get<any[]>(apiUrl).subscribe(
       (response) => {
         this.isLoading = false;
-
-        console.log('Pharmacy Prescriptions API Response:', response);
 
         // The API returns grouped prescriptions by patient directly as an array
         if (Array.isArray(response)) {
@@ -159,11 +155,14 @@ export class PharmacyStock implements OnInit {
         }
 
         this.filteredPrescriptions = this.prescriptions;
-        console.log('Processed pharmacy prescriptions:', this.prescriptions.length, 'patient groups');
+
+        // Refresh data periodically to catch new prescriptions
+        setTimeout(() => {
+          this.fetchPrescriptionsForPharmacist();
+        }, 30000); // Refresh every 30 seconds
       },
       (error) => {
         this.isLoading = false;
-        console.error('Error fetching prescriptions:', error);
         this.setErrorMessage('Failed to fetch prescriptions');
         this.prescriptions = [];
         this.filteredPrescriptions = [];

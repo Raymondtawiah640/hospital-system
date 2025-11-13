@@ -22,6 +22,7 @@ try {
             last_name,
             ghana_card_number,
             date_of_birth,
+            TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) as age,
             gender,
             blood_group,
             phone_number,

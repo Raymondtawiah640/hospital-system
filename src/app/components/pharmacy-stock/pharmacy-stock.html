@@ -55,6 +55,7 @@
         <tr>
           <th class="px-4 py-2 text-left">Patient</th>
           <th class="px-4 py-2 text-left">Doctor</th>
+          <th class="px-4 py-2 text-left">Illness</th>
           <th class="px-4 py-2 text-left">Medicines</th>
           <th class="px-4 py-2 text-left">Payment Status</th>
           <th class="px-4 py-2 text-center">Actions</th>
@@ -64,6 +65,7 @@
         <tr *ngFor="let prescription of filteredPrescriptions">
           <td class="px-4 py-2">{{ prescription.patient_name }}</td>
           <td class="px-4 py-2">{{ prescription.doctor_name || 'Unknown Doctor' }}</td>
+          <td class="px-4 py-2">{{ prescription.prescriptions[0]?.illness || 'N/A' }}</td>
           <td class="px-4 py-2">
             <div *ngFor="let med of prescription.prescriptions">
               {{ med.medicine_name }} ({{ med.dosage }})
@@ -93,6 +95,7 @@
       <div *ngIf="selectedPrescription" class="space-y-2">
         <p><strong>Patient:</strong> {{ selectedPrescription.patient_name }}</p>
         <p><strong>Doctor:</strong> {{ selectedPrescription.doctor_name || 'Unknown Doctor' }}</p>
+        <p><strong>Illness:</strong> {{ selectedPrescription.prescriptions[0]?.illness || 'N/A' }}</p>
         <p><strong>Payment Status:</strong> <span [ngClass]="getPaymentStatusClass(getPaymentStatus(selectedPrescription.patient_name))"> {{ getPaymentStatus(selectedPrescription.patient_name) }}</span></p>
         <h4 class="font-semibold mt-4">Medicines:</h4>
         <ul class="list-disc list-inside">

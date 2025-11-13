@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationStart, NavigationEnd } from '@angular/router';
 import { Navbar } from './components/navbar/navbar';
@@ -16,10 +16,11 @@ import { AuthService } from './services/auth';
 export class App {
   constructor(public auth: AuthService, private router: Router) {
     this.setupRouteLoading();
+    this.setupLayoutVisibility();
   }
 
   // reactive signal for showing layout
-  showLayout = computed(() => this.auth.loggedIn());
+  showLayout = signal<boolean>(false);
 
   // Loading state management
   isAppLoading: boolean = false;
@@ -33,6 +34,19 @@ export class App {
       if (event instanceof NavigationStart) {
         // Show loading for 5 seconds when navigation begins
         this.showLoadingFor(5000);
+      }
+    });
+  }
+
+  /**
+   * Setup layout visibility based on current route
+   */
+  private setupLayoutVisibility(): void {
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        // Hide layout on login page
+        const hideLayoutRoutes = ['/login'];
+        this.showLayout.set(!hideLayoutRoutes.includes(event.url));
       }
     });
   }
@@ -53,9 +67,9 @@ export class App {
 
   /**
    * Show loading for a specified duration
-   * @param duration - Duration in milliseconds (default: 5000ms)
+   * @param duration - Duration in milliseconds (default: 3000ms)
    */
-  showLoadingFor(duration: number = 5000): void {
+  showLoadingFor(duration: number = 3000): void {
     this.showLoading();
     setTimeout(() => {
       this.hideLoading();

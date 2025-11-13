@@ -18,14 +18,17 @@ export class Prescriptions implements OnInit, OnDestroy {
   doctorId: string = '';
   patientName: string = '';
   patients: any[] = [];
+  allPatients: any[] = [];
   medicines: any[] = [];
   filteredMedicines: any[] = [];
   testResults: any[] = [];
   filteredTestResults: any[] = [];
   searchTerm: string = '';
   selectedTest: any = null;
+  prescriptionMode: string = 'test';
   prescriptionData = {
     patientId: '',
+    illness: '',
     medicines: [{medicine: '', dosage: '', instructions: ''}]
   };
 
@@ -33,6 +36,7 @@ export class Prescriptions implements OnInit, OnDestroy {
   // Track prescribing state
   prescribingTests: Set<number> = new Set();
   prescribedTests: Set<number> = new Set();
+  existingPrescriptions: any[] = [];
 
   // Success and error messages
   successMessage: string = '';
@@ -92,6 +96,8 @@ export class Prescriptions implements OnInit, OnDestroy {
       }
       this.fetchMedicines();
       this.fetchTestResults();
+      this.fetchAllPatients();
+      this.fetchExistingPrescriptions();
     }
   }
 
@@ -139,6 +145,24 @@ export class Prescriptions implements OnInit, OnDestroy {
     );
   }
 
+  // Fetch existing prescriptions to check for duplicates
+  fetchExistingPrescriptions(): void {
+    const apiUrl = 'https://kilnenterprise.com/presbyterian-hospital/get-prescriptions.php';
+    this.http.get<any>(apiUrl).subscribe(
+      (response) => {
+        if (response.success) {
+          this.existingPrescriptions = response.prescriptions || [];
+        } else {
+          this.existingPrescriptions = [];
+        }
+      },
+      (error) => {
+        // If API fails, set empty array to avoid blocking prescriptions
+        this.existingPrescriptions = [];
+      }
+    );
+  }
+
   // Method to format a date string into yyyy-MM-dd format
   formatDate(date: string): string {
     const d = new Date(date);
@@ -173,6 +197,7 @@ export class Prescriptions implements OnInit, OnDestroy {
     this.selectedTest = null;
     this.prescriptionData = {
       patientId: '',
+      illness: '',
       medicines: [{medicine: '', dosage: '', instructions: ''}]
     };
   }
@@ -191,7 +216,7 @@ export class Prescriptions implements OnInit, OnDestroy {
 
   // Check if form is valid
   get isFormValid(): boolean {
-    return !!this.prescriptionData.patientId && this.prescriptionData.medicines.every(med => !!med.medicine && !!med.dosage);
+    return !!this.prescriptionData.patientId && !!this.prescriptionData.illness && this.prescriptionData.medicines.every(med => !!med.medicine && !!med.dosage);
   }
 
   // Function to filter medicines by name (for future use)
@@ -226,23 +251,59 @@ export class Prescriptions implements OnInit, OnDestroy {
     }
   }
 
+  // Fetch all patients for direct prescription
+  fetchAllPatients(): void {
+    this.http.get<any[]>('https://kilnenterprise.com/presbyterian-hospital/get-patients.php')
+      .subscribe(
+        (data) => {
+          if (data && Array.isArray(data)) {
+            this.allPatients = data;
+          }
+        },
+        (error) => {
+          this.setErrorMessage('Failed to fetch patients.');
+        }
+      );
+  }
+
   // Function to filter patients by name
   searchPatient() {
     if (this.patientName) {
-      this.http.get<any[]>(`https://kilnenterprise.com/presbyterian-hospital/get-patients.php?name=${this.patientName}`)
+      this.http.get<any>(`https://kilnenterprise.com/presbyterian-hospital/get-patients.php`)
         .subscribe(
-          (data) => {
-            this.patients = data;
-            if (data.length === 0) {
+          (response) => {
+            let patientsArray = [];
+
+            // Handle different response formats
+            if (Array.isArray(response)) {
+              patientsArray = response;
+            } else if (response && typeof response === 'object') {
+              // If it's an object, try to extract patients array
+              patientsArray = response.patients || response.data || [];
+            }
+
+            // Filter patients locally based on search term
+            const filteredPatients = patientsArray.filter((patient: any) =>
+              patient && patient.first_name && patient.last_name &&
+              `${patient.first_name} ${patient.last_name}`.toLowerCase().includes(this.patientName.toLowerCase())
+            );
+
+            this.patients = filteredPatients;
+
+            if (filteredPatients.length === 0) {
               this.setErrorMessage('No patients found with that name.');
+            } else {
+              this.setSuccessMessage(`Found ${filteredPatients.length} patient(s).`);
             }
           },
           (error) => {
             this.setErrorMessage('Failed to search patients.');
+            this.patients = [];
           }
         );
     } else {
       this.setErrorMessage('Please enter a patient name to search.');
+      this.patients = [];
     }
   }
 
@@ -252,6 +313,13 @@ export class Prescriptions implements OnInit, OnDestroy {
     const allMedicinesValid = this.prescriptionData.medicines.every(med => med.medicine && med.dosage);
 
     if (hasPatient && allMedicinesValid) {
+      // Check for duplicate prescriptions
+      const duplicates = this.checkForDuplicates();
+      if (duplicates.length > 0) {
+        this.setErrorMessage(`Duplicate prescriptions found: ${duplicates.join(', ')}. Please review existing prescriptions.`);
+        return;
+      }
+
       this.isLoading = true;
 
       // Send prescriptions for each medicine
@@ -260,29 +328,43 @@ export class Prescriptions implements OnInit, OnDestroy {
 
       this.prescriptionData.medicines.forEach(med => {
         const prescription = {
-          patientId: this.prescriptionData.patientId,
+          patientId: parseInt(this.prescriptionData.patientId), // Convert to integer
+          illness: this.prescriptionData.illness,
           medicine: med.medicine,
           dosage: med.dosage,
-          instructions: med.instructions
+          instructions: med.instructions,
+          doctor_name: this.getCurrentDoctorName() // Add doctor name directly
         };
 
-        this.http.post('https://kilnenterprise.com/presbyterian-hospital/prescriptions.php', prescription)
+        // Add timestamp to make each prescription unique
+        const prescriptionWithTimestamp = {
+          ...prescription,
+          prescription_date: new Date().toISOString(),
+          prescription_id: Date.now() + Math.random() // Unique ID for each prescription
+        };
+
+        this.http.post('https://kilnenterprise.com/presbyterian-hospital/prescriptions.php', prescriptionWithTimestamp)
           .subscribe(
-            (response) => {
-              console.log('Success Response:', response);
-              this.updateMedicineStock(med.medicine);
-              completed++;
-              if (completed === total) {
+            (response: any) => {
+              if (response && response.success) {
+                this.updateMedicineStock(med.medicine);
+                completed++;
+                if (completed === total) {
+                  this.isLoading = false;
+                  this.setSuccessMessage('All prescriptions successfully created.');
+                  this.prescribedTests.add(this.selectedTest.id);
+                  localStorage.setItem('prescribedTests', JSON.stringify([...this.prescribedTests]));
+                  this.prescribingTests.delete(this.selectedTest.id);
+                  this.selectedTest = null;
+                  this.cancel(); // Reset form
+                  this.fetchExistingPrescriptions(); // Refresh existing prescriptions
+                }
+              } else {
                 this.isLoading = false;
-                this.setSuccessMessage('All prescriptions successfully created.');
-                this.prescribedTests.add(this.selectedTest.id);
-                localStorage.setItem('prescribedTests', JSON.stringify([...this.prescribedTests]));
-                this.prescribingTests.delete(this.selectedTest.id);
-                this.selectedTest = null;
-                this.cancel(); // Reset form
+                this.setErrorMessage(`Failed to save prescription for ${med.medicine}`);
               }
             },
-            (error) => {
+            (error: any) => {
               console.error('Error Response:', error);
               this.isLoading = false;
               this.prescribingTests.delete(this.selectedTest.id);
@@ -297,6 +379,123 @@ export class Prescriptions implements OnInit, OnDestroy {
     } else {
       this.setErrorMessage('All fields must be filled out to prescribe medicine.');
     }
+  }
+
+  // Direct prescription method
+  prescribeMedicineDirect() {
+    // Check if all required fields are filled
+    const hasPatient = this.prescriptionData.patientId;
+    const allMedicinesValid = this.prescriptionData.medicines.every(med => med.medicine && med.dosage);
+
+    if (hasPatient && allMedicinesValid) {
+      // Check for duplicate prescriptions
+      const duplicates = this.checkForDuplicates();
+      if (duplicates.length > 0) {
+        this.setErrorMessage(`Duplicate prescriptions found: ${duplicates.join(', ')}. Please review existing prescriptions.`);
+        return;
+      }
+
+      this.isLoading = true;
+
+      // Send prescriptions for each medicine
+      let completed = 0;
+      const total = this.prescriptionData.medicines.length;
+
+      this.prescriptionData.medicines.forEach(med => {
+        const prescription = {
+          patientId: parseInt(this.prescriptionData.patientId), // Convert to integer
+          illness: this.prescriptionData.illness,
+          medicine: med.medicine,
+          dosage: med.dosage,
+          instructions: med.instructions,
+          doctor_name: this.getCurrentDoctorName() // Add doctor name directly
+        };
+
+        // Add timestamp to make each prescription unique
+        const prescriptionWithTimestamp = {
+          ...prescription,
+          prescription_date: new Date().toISOString(),
+          prescription_id: Date.now() + Math.random() // Unique ID for each prescription
+        };
+
+        this.http.post('https://kilnenterprise.com/presbyterian-hospital/prescriptions.php', prescriptionWithTimestamp)
+          .subscribe(
+            (response: any) => {
+              if (response && response.success) {
+                this.updateMedicineStock(med.medicine);
+                completed++;
+                if (completed === total) {
+                  this.isLoading = false;
+                  this.setSuccessMessage('All prescriptions successfully created.');
+                  this.cancelDirect(); // Reset form
+                  this.fetchExistingPrescriptions(); // Refresh existing prescriptions
+                }
+              } else {
+                this.isLoading = false;
+                this.setErrorMessage(`Failed to save prescription for ${med.medicine}`);
+              }
+            },
+            (error) => {
+              console.error('Error Response:', error);
+              this.isLoading = false;
+              if (error.status && error.message) {
+                this.setErrorMessage(`Error for ${med.medicine}: ${error.status} - ${error.message}`);
+              } else {
+                this.setErrorMessage(`An unknown error occurred for ${med.medicine}.`);
+              }
+            }
+          );
+      });
+    } else {
+      this.setErrorMessage('All fields must be filled out to prescribe medicine.');
+    }
+  }
+
+  // Check for duplicate prescriptions - allow same medicine for different illnesses
+  checkForDuplicates(): string[] {
+    const duplicates: string[] = [];
+    const patientPrescriptions = this.existingPrescriptions.filter(p => p.patient_id === this.prescriptionData.patientId);
+
+    this.prescriptionData.medicines.forEach(med => {
+      // Check if this medicine is already prescribed for the SAME illness
+      const existing = patientPrescriptions.find(p =>
+        p.medicine_name === med.medicine && p.illness === this.prescriptionData.illness
+      );
+      if (existing) {
+        duplicates.push(med.medicine);
+      }
+    });
+
+    return duplicates;
+  }
+
+  // Cancel direct prescription form
+  cancelDirect(): void {
+    this.prescriptionData = {
+      patientId: '',
+      illness: '',
+      medicines: [{medicine: '', dosage: '', instructions: ''}]
+    };
+    this.patientName = '';
+    this.patients = [];
+  }
+
+  // Get current doctor name from auth service or localStorage
+  getCurrentDoctorName(): string {
+    // Try to get from auth service first
+    const staff = this.authService.getStaff();
+    if (staff) {
+      return staff.full_name || 'Unknown Staff';
+    }
+
+    // Fallback to localStorage
+    const storedStaff = localStorage.getItem('staff');
+    if (storedStaff) {
+      const staffData = JSON.parse(storedStaff);
+      return staffData.full_name || 'Unknown Staff';
+    }
+
+    return 'Unknown Staff';
   }
 
 
