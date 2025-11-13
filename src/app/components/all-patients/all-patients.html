@@ -1,9 +1,12 @@
-<div *ngIf="!isLoggedIn" class="flex justify-center items-center h-screen">
-  <p class="text-center text-xl text-blue-600">You need to be logged in to access patient records. Redirecting to login...</p>
+<div *ngIf="!isLoggedIn" class="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+  <div class="w-full max-w-4xl bg-white shadow-lg rounded-lg p-8">
+    <p class="text-center text-xl text-blue-600">You need to be logged in to access patient records. Redirecting to login...</p>
+  </div>
 </div>
 
 <!-- If logged in, display patient records -->
-<div *ngIf="isLoggedIn">
+<div *ngIf="isLoggedIn" class="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+  <div class="w-full max-w-6xl bg-white shadow-lg rounded-lg p-8">
   <div class="flex justify-center mb-4 mt-4">
     <input
       type="text"
@@ -85,6 +88,7 @@
             <p><strong>Date of Birth:</strong> <span class="text-gray-700">{{ selectedPatient.date_of_birth | date:'mediumDate' }}</span></p>
             <p><strong>Gender:</strong> <span class="text-gray-700">{{ selectedPatient.gender }}</span></p>
             <p><strong>Blood Group:</strong> <span class="text-gray-700">{{ selectedPatient.blood_group || 'Not specified' }}</span></p>
+          </div>
           </div>
         </div>
 

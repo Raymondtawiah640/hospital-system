@@ -67,9 +67,9 @@ export class App {
 
   /**
    * Show loading for a specified duration
-   * @param duration - Duration in milliseconds (default: 3000ms)
+   * @param duration - Duration in milliseconds (default: 1000ms)
    */
-  showLoadingFor(duration: number = 3000): void {
+  showLoadingFor(duration: number = 1000): void {
     this.showLoading();
     setTimeout(() => {
       this.hideLoading();

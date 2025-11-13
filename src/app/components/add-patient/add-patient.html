@@ -1,5 +1,5 @@
-<div *ngIf="isLoggedIn; else loginRedirect">
-  <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
+<div *ngIf="isLoggedIn; else loginRedirect" class="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+  <div class="w-full max-w-4xl bg-white shadow-lg rounded-lg p-8">
     <h2 class="text-2xl font-bold text-blue-900 mb-6">Add New Patient</h2>
 
     <!-- Success or Error message -->
@@ -153,8 +153,10 @@
 
 <!-- Login Redirect Message -->
 <ng-template #loginRedirect>
-  <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
-    <h2 class="text-2xl font-bold text-blue-900 mb-6">Access Denied</h2>
-    <p class="text-lg text-red-600">You need to be logged in to access this page. Please <a href="/login" class="text-blue-600">log in</a>.</p>
+  <div class="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+    <div class="w-full max-w-4xl bg-white shadow-lg rounded-lg p-8">
+      <h2 class="text-2xl font-bold text-blue-900 mb-6">Access Denied</h2>
+      <p class="text-lg text-red-600">You need to be logged in to access this page. Please <a href="/login" class="text-blue-600">log in</a>.</p>
+    </div>
   </div>
 </ng-template>

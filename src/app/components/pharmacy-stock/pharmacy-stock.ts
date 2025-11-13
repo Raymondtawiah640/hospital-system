@@ -86,12 +86,12 @@ export class PharmacyStock implements OnInit {
       this.router.navigate(['/login']);
     } else {
       this.loadDoctors();
-      // Initial data load - delay to ensure doctors are loaded properly
+      // Initial data load - quick load for better UX
       setTimeout(() => {
         this.fetchPrescriptionsForPharmacist();
         this.fetchBills();
         this.fetchMedicines();
-      }, 3000); // Increased to 3 seconds
+      }, 500); // Reduced to 0.5 seconds for faster loading
     }
   }
 
