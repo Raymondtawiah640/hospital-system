@@ -9,12 +9,16 @@
   </div>
 
   <!-- Success and Error Messages -->
-  <div *ngIf="successMessage" class="max-w-7xl mx-auto text-green-500 text-center mb-4">
-    {{ successMessage }}
-  </div>
-  <div *ngIf="errorMessage" class="max-w-7xl mx-auto text-red-500 text-center mb-4">
-    {{ errorMessage }}
-  </div>
+  @if (successMessage) {
+    <div class="max-w-7xl mx-auto text-green-500 text-center mb-4">
+      {{ successMessage }}
+    </div>
+  }
+  @if (errorMessage) {
+    <div class="max-w-7xl mx-auto text-red-500 text-center mb-4">
+      {{ errorMessage }}
+    </div>
+  }
 
   <!-- Invoice Summary Cards -->
   <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
@@ -49,11 +53,13 @@
         <div>
           <h3 class="text-lg font-semibold text-gray-700 mb-3">Monthly Totals</h3>
           <div class="grid grid-cols-1 gap-4">
-            <div *ngFor="let monthData of getMonthlyTotalsArray()" class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <h4 class="font-medium text-blue-800">{{ monthData.month }}</h4>
-              <p class="text-2xl font-bold text-blue-600">GH₵{{ monthData.total | number:'1.2-2' }}</p>
-              <p class="text-sm text-blue-600">{{ monthData.count }} invoices</p>
-            </div>
+            @for (monthData of getMonthlyTotalsArray(); track monthData) {
+              <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h4 class="font-medium text-blue-800">{{ monthData.month }}</h4>
+                <p class="text-2xl font-bold text-blue-600">GH₵{{ monthData.total | number:'1.2-2' }}</p>
+                <p class="text-sm text-blue-600">{{ monthData.count }} invoices</p>
+              </div>
+            }
           </div>
         </div>
 
@@ -61,11 +67,13 @@
         <div>
           <h3 class="text-lg font-semibold text-gray-700 mb-3">Yearly Totals</h3>
           <div class="grid grid-cols-1 gap-4">
-            <div *ngFor="let yearData of getYearlyTotalsArray()" class="bg-green-50 p-4 rounded-lg border border-green-200">
-              <h4 class="font-medium text-green-800">{{ yearData.year }}</h4>
-              <p class="text-2xl font-bold text-green-600">GH₵{{ yearData.total | number:'1.2-2' }}</p>
-              <p class="text-sm text-green-600">{{ yearData.count }} invoices</p>
-            </div>
+            @for (yearData of getYearlyTotalsArray(); track yearData) {
+              <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h4 class="font-medium text-green-800">{{ yearData.year }}</h4>
+                <p class="text-2xl font-bold text-green-600">GH₵{{ yearData.total | number:'1.2-2' }}</p>
+                <p class="text-sm text-green-600">{{ yearData.count }} invoices</p>
+              </div>
+            }
           </div>
         </div>
       </div>
@@ -96,39 +104,47 @@
       </thead>
       <tbody class="divide-y divide-gray-200">
         <!-- Loading row -->
-        <tr *ngIf="isLoading">
-          <td colspan="7" class="text-center py-4 text-gray-500">
-            <div class="flex justify-center items-center">
-              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-              <span class="ml-2">Loading invoices...</span>
-            </div>
-          </td>
-        </tr>
+        @if (isLoading) {
+          <tr>
+            <td colspan="7" class="text-center py-4 text-gray-500">
+              <div class="flex justify-center items-center">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <span class="ml-2">Loading invoices...</span>
+              </div>
+            </td>
+          </tr>
+        }
 
         <!-- Error row -->
-        <tr *ngIf="errorMessage && !isLoading">
-          <td colspan="7" class="text-center py-4 text-red-500">{{ errorMessage }}</td>
-        </tr>
+        @if (errorMessage && !isLoading) {
+          <tr>
+            <td colspan="7" class="text-center py-4 text-red-500">{{ errorMessage }}</td>
+          </tr>
+        }
 
         <!-- Data rows -->
-        <tr *ngFor="let invoice of filteredInvoices" class="hover:bg-gray-50">
-          <td class="px-4 py-2">{{ invoice.invoice_number }}</td>
-          <td class="px-4 py-2">{{ invoice.patient_name }}</td>
-          <td class="px-4 py-2">{{ invoice.doctor_name }}</td>
-          <td class="px-4 py-2">GH₵{{ invoice.amount }}</td>
-          <td class="px-4 py-2">{{ invoice.date }}</td>
-          <td class="px-4 py-2">
-            <span [ngClass]="getStatusClass(invoice.status)">{{ invoice.status | titlecase }}</span>
-          </td>
-          <td class="px-4 py-2 text-center">
-            <button (click)="viewInvoice(invoice)" class="text-blue-600 hover:text-blue-800 mx-1">View</button>
-          </td>
-        </tr>
+        @for (invoice of filteredInvoices; track invoice) {
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-2">{{ invoice.invoice_number }}</td>
+            <td class="px-4 py-2">{{ invoice.patient_name }}</td>
+            <td class="px-4 py-2">{{ invoice.doctor_name }}</td>
+            <td class="px-4 py-2">GH₵{{ invoice.amount }}</td>
+            <td class="px-4 py-2">{{ invoice.date }}</td>
+            <td class="px-4 py-2">
+              <span [ngClass]="getStatusClass(invoice.status)">{{ invoice.status | titlecase }}</span>
+            </td>
+            <td class="px-4 py-2 text-center">
+              <button (click)="viewInvoice(invoice)" class="text-blue-600 hover:text-blue-800 mx-1">View</button>
+            </td>
+          </tr>
+        }
 
         <!-- No invoices row -->
-        <tr *ngIf="!isLoading && !errorMessage && filteredInvoices.length === 0">
-          <td colspan="7" class="text-center py-4 text-gray-500">No invoices found.</td>
-        </tr>
+        @if (!isLoading && !errorMessage && filteredInvoices.length === 0) {
+          <tr>
+            <td colspan="7" class="text-center py-4 text-gray-500">No invoices found.</td>
+          </tr>
+        }
       </tbody>
     </table>
   </div>
@@ -140,62 +156,71 @@
     </div>
     <div>
       <button (click)="prevPage()" [disabled]="currentPage <= 1"
-        class="px-3 py-1 bg-gray-200 rounded-l hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">Prev</button>
+      class="px-3 py-1 bg-gray-200 rounded-l hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">Prev</button>
       <button (click)="nextPage()" [disabled]="currentPage >= totalPages"
-        class="px-3 py-1 bg-gray-200 rounded-r hover:bg-gray-300 ml-1 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+      class="px-3 py-1 bg-gray-200 rounded-r hover:bg-gray-300 ml-1 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
     </div>
   </div>
 
   <!-- View Invoice Modal -->
-  <div *ngIf="showViewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-4xl max-h-screen overflow-y-auto">
-      <h2 class="text-xl font-bold mb-4">Invoice Details</h2>
-      <div *ngIf="selectedInvoice" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p><strong>Invoice Number:</strong> {{ selectedInvoice.invoice_number }}</p>
-            <p><strong>Patient:</strong> {{ selectedInvoice.patient_name }}</p>
-            <p><strong>Doctor:</strong> {{ selectedInvoice.doctor_name }}</p>
+  @if (showViewModal) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-full max-w-4xl max-h-screen overflow-y-auto">
+        <h2 class="text-xl font-bold mb-4">Invoice Details</h2>
+        @if (selectedInvoice) {
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p><strong>Invoice Number:</strong> {{ selectedInvoice.invoice_number }}</p>
+                <p><strong>Patient:</strong> {{ selectedInvoice.patient_name }}</p>
+                <p><strong>Doctor:</strong> {{ selectedInvoice.doctor_name }}</p>
+              </div>
+              <div>
+                <p><strong>Amount:</strong> GH₵{{ selectedInvoice.amount }}</p>
+                <p><strong>Date:</strong> {{ selectedInvoice.date }}</p>
+                <p><strong>Status:</strong> <span [ngClass]="getStatusClass(selectedInvoice.status)">{{ selectedInvoice.status | titlecase }}</span></p>
+              </div>
+            </div>
+            <!-- Prescribed Medications -->
+            <div class="mt-6">
+              <h3 class="text-lg font-semibold mb-3">Prescribed Medications</h3>
+              @if (prescriptions.length > 0) {
+                <div class="overflow-x-auto">
+                  <table class="min-w-full bg-white border border-gray-300">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Medication</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Dosage</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Instructions</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                      @for (prescription of prescriptions; track prescription) {
+                        <tr class="hover:bg-gray-50">
+                          <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ prescription.medicine_name || prescription.name }}</td>
+                          <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ prescription.dosage }}</td>
+                          <td class="px-4 py-2 text-sm text-gray-900">{{ prescription.instructions }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+              @if (prescriptions.length === 0) {
+                <div class="text-gray-500 italic">
+                  No medications prescribed for this patient.
+                </div>
+              }
+            </div>
           </div>
-          <div>
-            <p><strong>Amount:</strong> GH₵{{ selectedInvoice.amount }}</p>
-            <p><strong>Date:</strong> {{ selectedInvoice.date }}</p>
-            <p><strong>Status:</strong> <span [ngClass]="getStatusClass(selectedInvoice.status)">{{ selectedInvoice.status | titlecase }}</span></p>
-          </div>
+        }
+        <div class="flex justify-end space-x-2 mt-6">
+          <button (click)="printInvoice()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Print Invoice</button>
+          <button (click)="closeModals()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Close</button>
         </div>
-
-        <!-- Prescribed Medications -->
-        <div class="mt-6">
-          <h3 class="text-lg font-semibold mb-3">Prescribed Medications</h3>
-          <div *ngIf="prescriptions.length > 0" class="overflow-x-auto">
-            <table class="min-w-full bg-white border border-gray-300">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Medication</th>
-                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Dosage</th>
-                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Instructions</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200">
-                <tr *ngFor="let prescription of prescriptions" class="hover:bg-gray-50">
-                  <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ prescription.medicine_name || prescription.name }}</td>
-                  <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ prescription.dosage }}</td>
-                  <td class="px-4 py-2 text-sm text-gray-900">{{ prescription.instructions }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div *ngIf="prescriptions.length === 0" class="text-gray-500 italic">
-            No medications prescribed for this patient.
-          </div>
-        </div>
-      </div>
-      <div class="flex justify-end space-x-2 mt-6">
-        <button (click)="printInvoice()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Print Invoice</button>
-        <button (click)="closeModals()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Close</button>
       </div>
     </div>
-  </div>
+  }
 
 
 </div>

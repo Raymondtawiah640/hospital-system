@@ -3,7 +3,9 @@
   <app-loading [isLoading]="isAppLoading"></app-loading>
 
   <!-- Navbar conditionally visible -->
-  <app-navbar *ngIf="showLayout"></app-navbar>
+  @if (showLayout) {
+    <app-navbar></app-navbar>
+  }
 
   <!-- Main content -->
   <main class="flex-1 w-full">
@@ -11,5 +13,7 @@
   </main>
 
   <!-- Footer conditionally visible -->
-  <app-footer *ngIf="showLayout"></app-footer>
+  @if (showLayout) {
+    <app-footer></app-footer>
+  }
 </div>

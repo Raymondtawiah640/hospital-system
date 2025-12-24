@@ -9,12 +9,16 @@
   </div>
 
   <!-- Success and Error Messages -->
-  <div *ngIf="successMessage" class="max-w-7xl mx-auto text-green-500 text-center mb-4">
-    {{ successMessage }}
-  </div>
-  <div *ngIf="errorMessage" class="max-w-7xl mx-auto text-red-500 text-center mb-4">
-    {{ errorMessage }}
-  </div>
+  @if (successMessage) {
+    <div class="max-w-7xl mx-auto text-green-500 text-center mb-4">
+      {{ successMessage }}
+    </div>
+  }
+  @if (errorMessage) {
+    <div class="max-w-7xl mx-auto text-red-500 text-center mb-4">
+      {{ errorMessage }}
+    </div>
+  }
 
   <!-- Billing Summary Cards -->
   <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
@@ -70,40 +74,48 @@
       </thead>
       <tbody class="divide-y divide-gray-200">
         <!-- Loading row -->
-        <tr *ngIf="isLoading">
-          <td colspan="7" class="text-center py-4 text-gray-500">
-            <div class="flex justify-center items-center">
-              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-              <span class="ml-2">Loading bills...</span>
-            </div>
-          </td>
-        </tr>
+        @if (isLoading) {
+          <tr>
+            <td colspan="7" class="text-center py-4 text-gray-500">
+              <div class="flex justify-center items-center">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <span class="ml-2">Loading bills...</span>
+              </div>
+            </td>
+          </tr>
+        }
 
         <!-- Error row -->
-        <tr *ngIf="errorMessage && !isLoading">
-          <td colspan="7" class="text-center py-4 text-red-500">{{ errorMessage }}</td>
-        </tr>
+        @if (errorMessage && !isLoading) {
+          <tr>
+            <td colspan="7" class="text-center py-4 text-red-500">{{ errorMessage }}</td>
+          </tr>
+        }
 
         <!-- Data rows -->
-        <tr *ngFor="let bill of filteredBills" class="hover:bg-gray-50">
-          <td class="px-4 py-2">{{ bill.invoice_number }}</td>
-          <td class="px-4 py-2">{{ bill.patient_name }}</td>
-          <td class="px-4 py-2">{{ bill.doctor_name }}</td>
-          <td class="px-4 py-2">GH₵{{ bill.amount }}</td>
-          <td class="px-4 py-2">{{ bill.date }}</td>
-          <td class="px-4 py-2">
-            <span [ngClass]="getStatusClass(bill.status)">{{ bill.status | titlecase }}</span>
-          </td>
-          <td class="px-4 py-2 text-center">
-            <button (click)="viewBill(bill)" class="text-blue-600 hover:text-blue-800 mx-1">View</button>
-            <button (click)="editBill(bill)" class="text-yellow-600 hover:text-yellow-800 mx-1">Edit</button>
-          </td>
-        </tr>
+        @for (bill of filteredBills; track bill) {
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-2">{{ bill.invoice_number }}</td>
+            <td class="px-4 py-2">{{ bill.patient_name }}</td>
+            <td class="px-4 py-2">{{ bill.doctor_name }}</td>
+            <td class="px-4 py-2">GH₵{{ bill.amount }}</td>
+            <td class="px-4 py-2">{{ bill.date }}</td>
+            <td class="px-4 py-2">
+              <span [ngClass]="getStatusClass(bill.status)">{{ bill.status | titlecase }}</span>
+            </td>
+            <td class="px-4 py-2 text-center">
+              <button (click)="viewBill(bill)" class="text-blue-600 hover:text-blue-800 mx-1">View</button>
+              <button (click)="editBill(bill)" class="text-yellow-600 hover:text-yellow-800 mx-1">Edit</button>
+            </td>
+          </tr>
+        }
 
         <!-- No bills row -->
-        <tr *ngIf="!isLoading && !errorMessage && filteredBills.length === 0">
-          <td colspan="7" class="text-center py-4 text-gray-500">No bills found.</td>
-        </tr>
+        @if (!isLoading && !errorMessage && filteredBills.length === 0) {
+          <tr>
+            <td colspan="7" class="text-center py-4 text-gray-500">No bills found.</td>
+          </tr>
+        }
       </tbody>
     </table>
   </div>
@@ -115,158 +127,164 @@
     </div>
     <div>
       <button (click)="prevPage()" [disabled]="currentPage <= 1"
-        class="px-3 py-1 bg-gray-200 rounded-l hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">Prev</button>
+      class="px-3 py-1 bg-gray-200 rounded-l hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">Prev</button>
       <button (click)="nextPage()" [disabled]="currentPage >= totalPages"
-        class="px-3 py-1 bg-gray-200 rounded-r hover:bg-gray-300 ml-1 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+      class="px-3 py-1 bg-gray-200 rounded-r hover:bg-gray-300 ml-1 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
     </div>
   </div>
 
   <!-- Add/Edit Bill Form Modal -->
-  <div *ngIf="showForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md">
-      <h2 class="text-xl font-bold mb-4">{{ isEditing ? 'Edit Bill' : 'Add New Bill' }}</h2>
-      <form (ngSubmit)="saveBill()">
-        <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-bold mb-2">Invoice Number</label>
-          <input type="text" [(ngModel)]="currentBill.invoice_number" name="invoice_number" required readonly
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none">
-        </div>
-        <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-bold mb-2">Patient Name</label>
-          <input type="text" [(ngModel)]="currentBill.patient_name" name="patient_name" required
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none">
-        </div>
-        <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-bold mb-2">Doctor Name</label>
-          <input type="text" [(ngModel)]="currentBill.doctor_name" name="doctor_name" required
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none">
-        </div>
-        <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-bold mb-2">Amount</label>
-          <input type="number" [(ngModel)]="currentBill.amount" name="amount" step="0.01" required
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none">
-        </div>
-        <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-bold mb-2">Date</label>
-          <input type="date" [(ngModel)]="currentBill.date" name="date" required
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none">
-        </div>
-        <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-bold mb-2">Status</label>
-          <select [(ngModel)]="currentBill.status" name="status" required
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none">
-            <option value="pending">Pending</option>
-            <option value="paid">Paid</option>
-            <option value="overdue">Overdue</option>
-          </select>
-        </div>
-        <div class="flex justify-end space-x-2">
-          <button type="button" (click)="cancelForm()"
+  @if (showForm) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <h2 class="text-xl font-bold mb-4">{{ isEditing ? 'Edit Bill' : 'Add New Bill' }}</h2>
+        <form (ngSubmit)="saveBill()">
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Invoice Number</label>
+            <input type="text" [(ngModel)]="currentBill.invoice_number" name="invoice_number" required readonly
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Patient Name</label>
+            <input type="text" [(ngModel)]="currentBill.patient_name" name="patient_name" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none">
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Doctor Name</label>
+            <input type="text" [(ngModel)]="currentBill.doctor_name" name="doctor_name" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none">
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Amount</label>
+            <input type="number" [(ngModel)]="currentBill.amount" name="amount" step="0.01" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none">
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Date</label>
+            <input type="date" [(ngModel)]="currentBill.date" name="date" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none">
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Status</label>
+            <select [(ngModel)]="currentBill.status" name="status" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none">
+              <option value="pending">Pending</option>
+              <option value="paid">Paid</option>
+              <option value="overdue">Overdue</option>
+            </select>
+          </div>
+          <div class="flex justify-end space-x-2">
+            <button type="button" (click)="cancelForm()"
             class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancel</button>
-          <button type="submit"
+            <button type="submit"
             class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save</button>
-        </div>
-      </form>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
+  }
 
   <!-- View Bill Modal -->
-  <div *ngIf="showViewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md">
-      <h2 class="text-xl font-bold mb-4">Bill Details</h2>
-      <div *ngIf="selectedBill" class="space-y-2">
-        <p><strong>Invoice Number:</strong> {{ selectedBill.invoice_number }}</p>
-        <p><strong>Patient:</strong> {{ selectedBill.patient_name }}</p>
-        <p><strong>Doctor:</strong> {{ selectedBill.doctor_name }}</p>
-        <p><strong>Amount:</strong> GH₵{{ selectedBill.amount }}</p>
-        <p><strong>Date:</strong> {{ selectedBill.date }}</p>
-        <p><strong>Status:</strong> <span [ngClass]="getStatusClass(selectedBill.status)">{{ selectedBill.status | titlecase }}</span></p>
-      </div>
-      <div class="flex justify-end mt-4">
-        <button (click)="closeModals()"
+  @if (showViewModal) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <h2 class="text-xl font-bold mb-4">Bill Details</h2>
+        @if (selectedBill) {
+          <div class="space-y-2">
+            <p><strong>Invoice Number:</strong> {{ selectedBill.invoice_number }}</p>
+            <p><strong>Patient:</strong> {{ selectedBill.patient_name }}</p>
+            <p><strong>Doctor:</strong> {{ selectedBill.doctor_name }}</p>
+            <p><strong>Amount:</strong> GH₵{{ selectedBill.amount }}</p>
+            <p><strong>Date:</strong> {{ selectedBill.date }}</p>
+            <p><strong>Status:</strong> <span [ngClass]="getStatusClass(selectedBill.status)">{{ selectedBill.status | titlecase }}</span></p>
+          </div>
+        }
+        <div class="flex justify-end mt-4">
+          <button (click)="closeModals()"
           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Close</button>
+        </div>
       </div>
     </div>
-  </div>
+  }
 
 
   <!-- Prescriptions Modal -->
-  <div *ngIf="showPrescriptionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-4xl max-h-screen overflow-y-auto">
-      <h2 class="text-xl font-bold mb-4">Patient Prescriptions</h2>
-      <p class="text-gray-600 mb-4">Select a prescription to generate a bill for the patient.</p>
-
-      <!-- Search -->
-      <div class="mb-4">
-        <input type="text" [(ngModel)]="prescriptionSearchTerm" placeholder="Search patients..."
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none">
-      </div>
-
-      <div *ngIf="(getFilteredPrescriptions() || []).length === 0" class="text-center py-8 text-gray-500">
-        <p>No prescriptions found.</p>
-        <p class="text-sm mt-2">Debug: Check console for prescription data</p>
-      </div>
-
-
-      <div *ngFor="let prescription of getFilteredPrescriptions(); let i = index" class="bg-gray-50 p-4 rounded-lg mb-4 border">
-
-        <div class="flex justify-between items-start mb-3">
-          <div>
-            <h3 class="font-semibold text-lg">{{ prescription.patient_name }}</h3>
-            <p class="text-gray-600">Doctor: {{ prescription.doctor_name }}</p>
-          </div>
-          <div class="text-right">
-            <p class="text-2xl font-bold text-green-600">GH₵{{ prescription.total_amount }}</p>
-            <p class="text-sm text-gray-600">{{ prescription.prescriptions?.length || 0 }} medicine(s)</p>
-            <button (click)="generateBillFromPrescription(prescription)"
-              [disabled]="hasBill(prescription.patient_name)"
-              class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm mt-2 disabled:bg-gray-400 disabled:cursor-not-allowed">
-              Generate Bill
-            </button>
-          </div>
+  @if (showPrescriptionModal) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-full max-w-4xl max-h-screen overflow-y-auto">
+        <h2 class="text-xl font-bold mb-4">Patient Prescriptions</h2>
+        <p class="text-gray-600 mb-4">Select a prescription to generate a bill for the patient.</p>
+        <!-- Search -->
+        <div class="mb-4">
+          <input type="text" [(ngModel)]="prescriptionSearchTerm" placeholder="Search patients..."
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none">
         </div>
-
-        <div class="bg-white p-3 rounded border">
-          <h4 class="font-medium mb-3 text-blue-700">📋 Detailed Prescription:</h4>
-          <div class="space-y-3">
-            <div *ngFor="let med of prescription.prescriptions; let i = index" class="bg-gray-50 p-3 rounded border-l-4 border-blue-400">
-              <div class="flex justify-between items-start">
-                <div class="flex-1">
-                  <div class="flex items-center mb-1">
-                    <span class="inline-flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-800 text-xs font-bold rounded-full mr-2">
-                      {{ i + 1 }}
-                    </span>
-                    <span class="font-semibold text-lg text-gray-800">{{ med.medicine_name }}</span>
+        @if ((getFilteredPrescriptions() || []).length === 0) {
+          <div class="text-center py-8 text-gray-500">
+            <p>No prescriptions found.</p>
+            <p class="text-sm mt-2">Debug: Check console for prescription data</p>
+          </div>
+        }
+        @for (prescription of getFilteredPrescriptions(); track prescription; let i = $index) {
+          <div class="bg-gray-50 p-4 rounded-lg mb-4 border">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <h3 class="font-semibold text-lg">{{ prescription.patient_name }}</h3>
+                <p class="text-gray-600">Doctor: {{ prescription.doctor_name }}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-2xl font-bold text-green-600">GH₵{{ prescription.total_amount }}</p>
+                <p class="text-sm text-gray-600">{{ prescription.prescriptions?.length || 0 }} medicine(s)</p>
+                <button (click)="generateBillFromPrescription(prescription)"
+                  [disabled]="hasBill(prescription.patient_name)"
+                  class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm mt-2 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                  Generate Bill
+                </button>
+              </div>
+            </div>
+            <div class="bg-white p-3 rounded border">
+              <h4 class="font-medium mb-3 text-blue-700">📋 Detailed Prescription:</h4>
+              <div class="space-y-3">
+                @for (med of prescription.prescriptions; track med; let i = $index) {
+                  <div class="bg-gray-50 p-3 rounded border-l-4 border-blue-400">
+                    <div class="flex justify-between items-start">
+                      <div class="flex-1">
+                        <div class="flex items-center mb-1">
+                          <span class="inline-flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-800 text-xs font-bold rounded-full mr-2">
+                            {{ i + 1 }}
+                          </span>
+                          <span class="font-semibold text-lg text-gray-800">{{ med.medicine_name }}</span>
+                        </div>
+                        <div class="ml-8 space-y-1">
+                          <p class="text-gray-700"><strong>Dosage:</strong> {{ med.dosage }}</p>
+                          <p class="text-gray-700"><strong>Instructions:</strong> {{ med.instructions || 'No specific instructions' }}</p>
+                          <p class="text-gray-600"><strong>Prescription ID:</strong> {{ med.id }}</p>
+                        </div>
+                      </div>
+                      <div class="text-right ml-4">
+                        <div class="text-xl font-bold text-green-600">GH₵{{ med.price }}</div>
+                        <div class="text-sm text-gray-500">Stock: {{ med.stock_quantity }}</div>
+                        <div class="text-xs text-gray-400">Medicine ID: {{ med.medicine_id }}</div>
+                      </div>
+                    </div>
                   </div>
-                  <div class="ml-8 space-y-1">
-                    <p class="text-gray-700"><strong>Dosage:</strong> {{ med.dosage }}</p>
-                    <p class="text-gray-700"><strong>Instructions:</strong> {{ med.instructions || 'No specific instructions' }}</p>
-                    <p class="text-gray-600"><strong>Prescription ID:</strong> {{ med.id }}</p>
-                  </div>
-                </div>
-                <div class="text-right ml-4">
-                  <div class="text-xl font-bold text-green-600">GH₵{{ med.price }}</div>
-                  <div class="text-sm text-gray-500">Stock: {{ med.stock_quantity }}</div>
-                  <div class="text-xs text-gray-400">Medicine ID: {{ med.medicine_id }}</div>
+                }
+              </div>
+              <div class="mt-4 pt-3 border-t border-gray-200">
+                <div class="flex justify-between items-center">
+                  <span class="font-medium text-gray-700">Total Amount:</span>
+                  <span class="text-xl font-bold text-green-600">GH₵{{ prescription.total_amount }}</span>
                 </div>
               </div>
             </div>
           </div>
-
-          <div class="mt-4 pt-3 border-t border-gray-200">
-            <div class="flex justify-between items-center">
-              <span class="font-medium text-gray-700">Total Amount:</span>
-              <span class="text-xl font-bold text-green-600">GH₵{{ prescription.total_amount }}</span>
-            </div>
-          </div>
+        }
+        <div class="flex justify-end mt-4">
+          <button (click)="closeModals()"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Close</button>
         </div>
       </div>
-
-      <div class="flex justify-end mt-4">
-        <button (click)="closeModals()"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Close</button>
-      </div>
     </div>
-  </div>
+  }
 
 </div>

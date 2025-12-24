@@ -1,46 +1,45 @@
-<div class="loading-overlay" *ngIf="isLoading">
-  <!-- Animated Background Elements -->
-  <div class="background-animation">
-    <div class="floating-element element-1"></div>
-    <div class="floating-element element-2"></div>
-    <div class="floating-element element-3"></div>
-    <div class="floating-element element-4"></div>
-    <div class="floating-element element-5"></div>
-    <div class="floating-element element-6"></div>
-    <div class="floating-element element-7"></div>
-    <div class="floating-element element-8"></div>
-    <div class="pulse-element pulse-1"></div>
-    <div class="pulse-element pulse-2"></div>
-    <div class="pulse-element pulse-3"></div>
+@if (isLoading) {
+  <div class="loading-overlay">
+    <!-- Animated Background Elements -->
+    <div class="background-animation">
+      <div class="floating-element element-1"></div>
+      <div class="floating-element element-2"></div>
+      <div class="floating-element element-3"></div>
+      <div class="floating-element element-4"></div>
+      <div class="floating-element element-5"></div>
+      <div class="floating-element element-6"></div>
+      <div class="floating-element element-7"></div>
+      <div class="floating-element element-8"></div>
+      <div class="pulse-element pulse-1"></div>
+      <div class="pulse-element pulse-2"></div>
+      <div class="pulse-element pulse-3"></div>
+    </div>
+    <div class="loading-container">
+      <!-- Enhanced Medical-themed Loading Animation -->
+      <div class="medical-loader">
+        <div class="pulse-ring"></div>
+        <div class="pulse-ring ring2"></div>
+        <div class="pulse-ring ring3"></div>
+        <div class="medical-cross">
+          <div class="cross-horizontal"></div>
+          <div class="cross-vertical"></div>
+        </div>
+      </div>
+      <!-- Loading Text with Animation -->
+      <div class="loading-text-container">
+        <div class="loading-text">Loading</div>
+        <div class="loading-dots">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
+      <!-- Progress Bar -->
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div class="loading-container">
-    <!-- Enhanced Medical-themed Loading Animation -->
-    <div class="medical-loader">
-      <div class="pulse-ring"></div>
-      <div class="pulse-ring ring2"></div>
-      <div class="pulse-ring ring3"></div>
-      <div class="medical-cross">
-        <div class="cross-horizontal"></div>
-        <div class="cross-vertical"></div>
-      </div>
-    </div>
-
-    <!-- Loading Text with Animation -->
-    <div class="loading-text-container">
-      <div class="loading-text">Loading</div>
-      <div class="loading-dots">
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-      </div>
-    </div>
-
-    <!-- Progress Bar -->
-    <div class="progress-container">
-      <div class="progress-bar">
-        <div class="progress-fill"></div>
-      </div>
-    </div>
-  </div>
-</div>
+}

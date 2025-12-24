@@ -1,7 +1,7 @@
 <nav class="bg-blue-700 text-white shadow-md relative z-50" (document:click)="onOutsideClick($event)">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between h-16 items-center flex-wrap">
-      
+
       <!-- Logo -->
       <div class="flex items-center">
         <div class="h-12 w-12 flex items-center justify-center bg-white rounded-full shadow-md mr-2">
@@ -11,107 +11,168 @@
 
       <!-- Desktop Navigation -->
       <div class="hidden md:flex flex-wrap space-x-6 items-center">
-        <a *ngIf="isLoggedIn" routerLink="/dashboard" (click)="navigateAndClose()" class="hover:text-red-400">Dashboard</a>
+        @if (isLoggedIn) {
+          <a routerLink="/dashboard" (click)="navigateAndClose()" class="hover:text-red-400">Dashboard</a>
+        }
 
         <!-- Patients Dropdown -->
-        <div *ngIf="isLoggedIn" class="relative"
-             (mouseenter)="openDropdownMenu('patients')"
-             (mouseleave)="closeDropdownMenu()">
-          <button class="hover:text-green-400 flex items-center">
-            Patients <span class="ml-1">▾</span>
-          </button>
-          <div *ngIf="openDropdown === 'patients'" class="absolute left-0 flex flex-col bg-white text-black mt-2 rounded shadow-lg w-44 z-50">
-            <a routerLink="/all-patients" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">All Patients</a>
-            <a routerLink="/add-patient" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Add Patient</a>
+        @if (isLoggedIn) {
+          <div class="relative"
+            (mouseenter)="openDropdownMenu('patients')"
+            (mouseleave)="closeDropdownMenu()">
+            <button class="hover:text-green-400 flex items-center">
+              Patients <span class="ml-1">▾</span>
+            </button>
+            @if (openDropdown === 'patients') {
+              <div class="absolute left-0 flex flex-col bg-white text-black mt-2 rounded shadow-lg w-44 z-50">
+                <a routerLink="/all-patients" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">All Patients</a>
+                <a routerLink="/add-patient" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Add Patient</a>
+              </div>
+            }
           </div>
-        </div>
+        }
 
         <!-- Doctors Dropdown -->
-        <div *ngIf="isLoggedIn" class="relative"
-             (mouseenter)="openDropdownMenu('doctors')"
-             (mouseleave)="closeDropdownMenu()">
-          <button class="hover:text-green-400 flex items-center">
-            Doctors <span class="ml-1">▾</span>
-          </button>
-          <div *ngIf="openDropdown === 'doctors'" class="absolute left-0 flex flex-col bg-white text-black mt-2 rounded shadow-lg w-44 z-50">
-            <a routerLink="/all-doctors" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">All Doctors</a>
-            <a *ngIf="isAdmin" routerLink="/add-doctor" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Add Doctor</a>
-            <a *ngIf="isAdmin" routerLink="/schedules" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Schedules</a>
-            <a *ngIf="isAdmin" routerLink="/history" (click)="navigateAndClose() " class="block px-4 py-2 hover:bg-green-100">History</a>
+        @if (isLoggedIn) {
+          <div class="relative"
+            (mouseenter)="openDropdownMenu('doctors')"
+            (mouseleave)="closeDropdownMenu()">
+            <button class="hover:text-green-400 flex items-center">
+              Doctors <span class="ml-1">▾</span>
+            </button>
+            @if (openDropdown === 'doctors') {
+              <div class="absolute left-0 flex flex-col bg-white text-black mt-2 rounded shadow-lg w-44 z-50">
+                <a routerLink="/all-doctors" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">All Doctors</a>
+                @if (isAdmin) {
+                  <a routerLink="/add-doctor" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Add Doctor</a>
+                }
+                @if (isAdmin) {
+                  <a routerLink="/schedules" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Schedules</a>
+                }
+                @if (isAdmin) {
+                  <a routerLink="/history" (click)="navigateAndClose() " class="block px-4 py-2 hover:bg-green-100">History</a>
+                }
+              </div>
+            }
           </div>
-        </div>
+        }
 
         <!-- Appointments Dropdown -->
-        <div *ngIf="isLoggedIn" class="relative" (mouseenter)="openDropdownMenu('appointments')" (mouseleave)="closeDropdownMenu()">
-          <button class="hover:text-green-400 flex items-center">
-            Appointments <span class="ml-1">▾</span>
-          </button>
-          <div *ngIf="openDropdown === 'appointments'" class="absolute left-0 flex flex-col bg-white text-black mt-2 rounded shadow-lg w-48 z-50">
-            <a routerLink="/all-appointments" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">All Appointments</a>
-            <a *ngIf="isAdmin || isEmergency" routerLink="/book-appointment" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Book Appointment</a>
-            <a *ngIf="isAdmin" routerLink="/appointment-history" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Appointment History</a>
+        @if (isLoggedIn) {
+          <div class="relative" (mouseenter)="openDropdownMenu('appointments')" (mouseleave)="closeDropdownMenu()">
+            <button class="hover:text-green-400 flex items-center">
+              Appointments <span class="ml-1">▾</span>
+            </button>
+            @if (openDropdown === 'appointments') {
+              <div class="absolute left-0 flex flex-col bg-white text-black mt-2 rounded shadow-lg w-48 z-50">
+                <a routerLink="/all-appointments" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">All Appointments</a>
+                @if (isAdmin || isEmergency) {
+                  <a routerLink="/book-appointment" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Book Appointment</a>
+                }
+                @if (isAdmin) {
+                  <a routerLink="/appointment-history" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Appointment History</a>
+                }
+              </div>
+            }
           </div>
-        </div>
+        }
 
         <!-- Lab & Pharmacy Dropdown -->
-        <div *ngIf="isLoggedIn" class="relative" (mouseenter)="openDropdownMenu('lab')" (mouseleave)="closeDropdownMenu()">
-          <button class="hover:text-green-400 flex items-center">
-            Lab & Pharmacy <span class="ml-1">▾</span>
-          </button>
-          <div *ngIf="openDropdown === 'lab'" class="absolute left-0 flex flex-col bg-white text-black mt-2 rounded shadow-lg w-48 z-50">
-            <a *ngIf="isLaboratory || isAdmin" routerLink="/laboratory-tests" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Laboratory Tests</a>
-            <a *ngIf="isLaboratory || isAdmin || isEmergency" routerLink="/test-results" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Test Results</a>
-            <a *ngIf="isPharmacy || isAdmin" routerLink="/pharmacy-stock" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Pharmacy Stock</a>
-            <a *ngIf="isAdmin || isLaboratory || isEmergency" routerLink="/prescriptions" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Prescriptions</a>
+        @if (isLoggedIn) {
+          <div class="relative" (mouseenter)="openDropdownMenu('lab')" (mouseleave)="closeDropdownMenu()">
+            <button class="hover:text-green-400 flex items-center">
+              Lab & Pharmacy <span class="ml-1">▾</span>
+            </button>
+            @if (openDropdown === 'lab') {
+              <div class="absolute left-0 flex flex-col bg-white text-black mt-2 rounded shadow-lg w-48 z-50">
+                @if (isLaboratory || isAdmin) {
+                  <a routerLink="/laboratory-tests" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Laboratory Tests</a>
+                }
+                @if (isLaboratory || isAdmin || isEmergency) {
+                  <a routerLink="/test-results" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Test Results</a>
+                }
+                @if (isPharmacy || isAdmin) {
+                  <a routerLink="/pharmacy-stock" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Pharmacy Stock</a>
+                }
+                @if (isAdmin || isLaboratory || isEmergency) {
+                  <a routerLink="/prescriptions" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Prescriptions</a>
+                }
+              </div>
+            }
           </div>
-        </div>
+        }
 
         <!-- Billing Dropdown -->
-        <div *ngIf="isLoggedIn" class="relative" (mouseenter)="openDropdownMenu('billing')" (mouseleave)="closeDropdownMenu()">
-          <button class="hover:text-green-400 flex items-center">
-            Billing & Records <span class="ml-1">▾</span>
-          </button>
-          <div *ngIf="openDropdown === 'billing'" class="absolute left-0 flex flex-col bg-white text-black mt-2 rounded shadow-lg w-52 z-50">
-            <a *ngIf="isFinance ||  isAdmin" routerLink="/billing" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Billing</a>
-            <a *ngIf="isFinance ||  isAdmin" routerLink="/invoices" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Invoices</a>
-            <a *ngIf="isAdmin" routerLink="/medical-records" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Medical Records</a>
+        @if (isLoggedIn) {
+          <div class="relative" (mouseenter)="openDropdownMenu('billing')" (mouseleave)="closeDropdownMenu()">
+            <button class="hover:text-green-400 flex items-center">
+              Billing & Records <span class="ml-1">▾</span>
+            </button>
+            @if (openDropdown === 'billing') {
+              <div class="absolute left-0 flex flex-col bg-white text-black mt-2 rounded shadow-lg w-52 z-50">
+                @if (isFinance ||  isAdmin) {
+                  <a routerLink="/billing" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Billing</a>
+                }
+                @if (isFinance ||  isAdmin) {
+                  <a routerLink="/invoices" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Invoices</a>
+                }
+                @if (isAdmin) {
+                  <a routerLink="/medical-records" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Medical Records</a>
+                }
+              </div>
+            }
           </div>
-        </div>
+        }
 
         <!-- Reports Dropdown -->
-        <div *ngIf="isLoggedIn" class="relative" (mouseenter)="openDropdownMenu('reports')" (mouseleave)="closeDropdownMenu()">
-          <button class="hover:text-green-400 flex items-center">
-            Reports <span class="ml-1">▾</span>
-          </button>
-          <div *ngIf="openDropdown === 'reports'" class="absolute right-0 flex flex-col bg-white text-black mt-2 rounded shadow-lg w-48 z-50">
-            <a *ngIf="isAdmin" routerLink="/daily-reports" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Daily Reports</a>
-            <a *ngIf="isAdmin" routerLink="/monthly-reports" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Monthly Reports</a>
-            <a *ngIf="isAdmin" routerLink="/annual-reports" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Annual Reports</a>
-            <a *ngIf="isAdmin" routerLink="/authenticate" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Authenticate</a>
-            <a *ngIf="isAdmin" routerLink="/general-department" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">General Department</a>
-            <a *ngIf="isAdmin" routerLink="/result" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">General Department Result</a>
+        @if (isLoggedIn) {
+          <div class="relative" (mouseenter)="openDropdownMenu('reports')" (mouseleave)="closeDropdownMenu()">
+            <button class="hover:text-green-400 flex items-center">
+              Reports <span class="ml-1">▾</span>
+            </button>
+            @if (openDropdown === 'reports') {
+              <div class="absolute right-0 flex flex-col bg-white text-black mt-2 rounded shadow-lg w-48 z-50">
+                @if (isAdmin) {
+                  <a routerLink="/daily-reports" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Daily Reports</a>
+                }
+                @if (isAdmin) {
+                  <a routerLink="/monthly-reports" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Monthly Reports</a>
+                }
+                @if (isAdmin) {
+                  <a routerLink="/annual-reports" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Annual Reports</a>
+                }
+                @if (isAdmin) {
+                  <a routerLink="/authenticate" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">Authenticate</a>
+                }
+                @if (isAdmin) {
+                  <a routerLink="/general-department" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">General Department</a>
+                }
+                @if (isAdmin) {
+                  <a routerLink="/result" (click)="navigateAndClose()" class="block px-4 py-2 hover:bg-green-100">General Department Result</a>
+                }
+              </div>
+            }
           </div>
-        </div>
+        }
 
-       <!-- Auth Section -->
-    <div class="flex items-center ml-6 relative">
-      <ng-container *ngIf="isLoggedIn; else guestLinks">
-        <!-- Profile Icon and Name -->
-        <div class="flex items-center space-x-2 cursor-pointer">
-          <a [routerLink]="'/profile'" class="flex items-center space-x-2">
-            <img src="user.png" alt="Profile" class="w-8 h-8 rounded-full">        
-          </a>
-        </div>
-      </ng-container>
-
-          <!-- Guest Links -->
-          <ng-template #guestLinks>
-            <a routerLink="/login" 
-              (click)="navigateAndClose()" 
+        <!-- Auth Section -->
+        <div class="flex items-center ml-6 relative">
+          @if (isLoggedIn) {
+            <!-- Profile Icon and Name -->
+            <div class="flex items-center space-x-2 cursor-pointer">
+              <a [routerLink]="'/profile'" class="flex items-center space-x-2">
+                <img src="user.png" alt="Profile" class="w-8 h-8 rounded-full">
+              </a>
+            </div>
+          } @else {
+            <a routerLink="/login"
+              (click)="navigateAndClose()"
               class="flex items-center space-x-2 hover:text-green-400">
               <span>Login</span>
             </a>
-          </ng-template>
+          }
+
+          <!-- Guest Links -->
         </div>
       </div>
 
@@ -120,56 +181,102 @@
         <button (click)="toggleMenu()" class="focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 rounded p-2" aria-label="Toggle mobile menu">
           <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M4 6h16M4 12h16M4 18h16"/>
+              d="M4 6h16M4 12h16M4 18h16"/>
           </svg>
         </button>
       </div>
 
       <!-- Mobile Menu -->
-      <div *ngIf="menuOpen" class="md:hidden bg-blue-700 text-white w-full absolute top-full left-0 z-50 shadow-lg border-t border-blue-600">
-        <!-- Auth Section for Mobile - Moved to Top -->
-        <div class="px-4 py-3 border-b border-blue-600 bg-blue-800">
-          <ng-container *ngIf="isLoggedIn; else mobileGuestLinks">
-            <!-- Profile Section for Mobile -->
-            <div class="flex items-center space-x-3">
-              <img src="user.png" alt="Profile" class="w-8 h-8 rounded-full border-2 border-white">
-              <a routerLink="/profile" (click)="closeMenu()" class="text-sm hover:text-green-400 font-medium flex-1">Profile</a>
-            </div>
-          </ng-container>
-          <ng-template #mobileGuestLinks>
-            <a routerLink="/login" (click)="closeMenu()" class="block hover:bg-blue-600 py-2 rounded">
-              <span class="text-sm font-medium">🔓 Login</span>
-            </a>
-          </ng-template>
+      @if (menuOpen) {
+        <div class="md:hidden bg-blue-700 text-white w-full absolute top-full left-0 z-50 shadow-lg border-t border-blue-600">
+          <!-- Auth Section for Mobile - Moved to Top -->
+          <div class="px-4 py-3 border-b border-blue-600 bg-blue-800">
+            @if (isLoggedIn) {
+              <!-- Profile Section for Mobile -->
+              <div class="flex items-center space-x-3">
+                <img src="user.png" alt="Profile" class="w-8 h-8 rounded-full border-2 border-white">
+                <a routerLink="/profile" (click)="closeMenu()" class="text-sm hover:text-green-400 font-medium flex-1">Profile</a>
+              </div>
+            } @else {
+              <a routerLink="/login" (click)="closeMenu()" class="block hover:bg-blue-600 py-2 rounded">
+                <span class="text-sm font-medium">🔓 Login</span>
+              </a>
+            }
+          </div>
+          <!-- Navigation Links -->
+          <div class="max-h-96 overflow-y-auto">
+            @if (isLoggedIn) {
+              <a routerLink="/dashboard" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Dashboard</a>
+            }
+            @if (isLoggedIn) {
+              <a routerLink="/all-patients" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">All Patients</a>
+            }
+            @if (isLoggedIn) {
+              <a routerLink="/add-patient" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Add Patient</a>
+            }
+            @if (isLoggedIn) {
+              <a routerLink="/all-doctors" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">All Doctors</a>
+            }
+            @if (isLoggedIn && isAdmin) {
+              <a routerLink="/add-doctor" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Add Doctor</a>
+            }
+            @if (isLoggedIn && isAdmin) {
+              <a routerLink="/schedules" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Schedules</a>
+            }
+            @if (isLoggedIn) {
+              <a routerLink="/all-appointments" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">All Appointments</a>
+            }
+            @if (isLoggedIn && (isAdmin || isEmergency)) {
+              <a routerLink="/book-appointment" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Book Appointment</a>
+            }
+            @if (isLoggedIn && isAdmin) {
+              <a routerLink="/appointment-history" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Appointment History</a>
+            }
+            @if (isLoggedIn && (isLaboratory || isAdmin)) {
+              <a routerLink="/laboratory-tests" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Laboratory Tests</a>
+            }
+            @if (isLoggedIn && (isLaboratory || isAdmin)) {
+              <a routerLink="/test-results" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Test Results</a>
+            }
+            @if (isLoggedIn && (isPharmacy || isAdmin)) {
+              <a routerLink="/pharmacy-stock" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Pharmacy Stock</a>
+            }
+            @if (isLoggedIn && (isAdmin || isLaboratory || isEmergency)) {
+              <a routerLink="/prescriptions" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Prescriptions</a>
+            }
+            @if (isLoggedIn && (isFinance || isAdmin)) {
+              <a routerLink="/billing" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Billing</a>
+            }
+            @if (isLoggedIn && (isAdmin || isFinance)) {
+              <a routerLink="/invoices" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Invoices</a>
+            }
+            @if (isLoggedIn) {
+              <a routerLink="/medical-records" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Medical Records</a>
+            }
+            @if (isLoggedIn) {
+              <a routerLink="/general-department" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">General Department</a>
+            }
+            @if (isLoggedIn && isAdmin) {
+              <a routerLink="/daily-reports" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Daily Reports</a>
+            }
+            @if (isLoggedIn && isAdmin) {
+              <a routerLink="/monthly-reports" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Monthly Reports</a>
+            }
+            @if (isLoggedIn && isAdmin) {
+              <a routerLink="/annual-reports" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Annual Reports</a>
+            }
+            @if (isLoggedIn && isAdmin) {
+              <a routerLink="/authenticate" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Authenticate</a>
+            }
+            @if (isLoggedIn && isAdmin) {
+              <a routerLink="/general-department" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">General Department</a>
+            }
+            @if (isLoggedIn && isAdmin) {
+              <a routerLink="/result" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">General Department Result</a>
+            }
+          </div>
         </div>
-       
-        <!-- Navigation Links -->
-        <div class="max-h-96 overflow-y-auto">
-          <a *ngIf="isLoggedIn" routerLink="/dashboard" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Dashboard</a>
-          <a *ngIf="isLoggedIn" routerLink="/all-patients" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">All Patients</a>
-          <a *ngIf="isLoggedIn" routerLink="/add-patient" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Add Patient</a>
-          <a *ngIf="isLoggedIn" routerLink="/all-doctors" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">All Doctors</a>
-          <a *ngIf="isLoggedIn && isAdmin" routerLink="/add-doctor" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Add Doctor</a>
-          <a *ngIf="isLoggedIn && isAdmin" routerLink="/schedules" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Schedules</a>
-          <a *ngIf="isLoggedIn" routerLink="/all-appointments" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">All Appointments</a>
-          <a *ngIf="isLoggedIn && (isAdmin || isEmergency)" routerLink="/book-appointment" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Book Appointment</a>
-          <a *ngIf="isLoggedIn && isAdmin" routerLink="/appointment-history" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Appointment History</a>
-          <a *ngIf="isLoggedIn && (isLaboratory || isAdmin)" routerLink="/laboratory-tests" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Laboratory Tests</a>
-          <a *ngIf="isLoggedIn && (isLaboratory || isAdmin)" routerLink="/test-results" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Test Results</a>
-          <a *ngIf="isLoggedIn && (isPharmacy || isAdmin)" routerLink="/pharmacy-stock" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Pharmacy Stock</a>
-          <a *ngIf="isLoggedIn && (isAdmin || isLaboratory || isEmergency)" routerLink="/prescriptions" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Prescriptions</a>
-          <a *ngIf="isLoggedIn && (isFinance || isAdmin)" routerLink="/billing" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Billing</a>
-          <a *ngIf="isLoggedIn && (isAdmin || isFinance)" routerLink="/invoices" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Invoices</a>
-          <a *ngIf="isLoggedIn" routerLink="/medical-records" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Medical Records</a>
-          <a *ngIf="isLoggedIn" routerLink="/general-department" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">General Department</a>
-          <a *ngIf="isLoggedIn && isAdmin" routerLink="/daily-reports" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Daily Reports</a>
-          <a *ngIf="isLoggedIn && isAdmin" routerLink="/monthly-reports" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Monthly Reports</a>
-          <a *ngIf="isLoggedIn && isAdmin" routerLink="/annual-reports" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Annual Reports</a>
-          <a *ngIf="isLoggedIn && isAdmin" routerLink="/authenticate" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">Authenticate</a>
-          <a *ngIf="isLoggedIn && isAdmin" routerLink="/general-department" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">General Department</a>
-          <a *ngIf="isLoggedIn && isAdmin" routerLink="/result" (click)="closeMenu()" class="block px-4 py-3 hover:bg-blue-600 transition-colors duration-200">General Department Result</a>
-        </div>
-      </div>
+      }
     </div>
   </div>
 </nav>

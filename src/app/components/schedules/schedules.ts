@@ -3,13 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';  // Import the AuthService
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-schedules',
   templateUrl: './schedules.html',
   styleUrls: ['./schedules.css'],
-  imports: [FormsModule, CommonModule]
+  imports: [FormsModule]
 })
 export class Schedules implements OnInit {
   doctors: any[] = [];

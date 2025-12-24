@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 // Loading service to prevent loading indicators during testimonial transitions
 class LoadingService {
@@ -35,7 +35,7 @@ interface Testimonial {
 
 @Component({
   selector: 'app-customer',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
 })

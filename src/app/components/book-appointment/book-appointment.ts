@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';  // Import AuthService
@@ -10,7 +10,7 @@ import { AuthService } from '../../services/auth';  // Import AuthService
   selector: 'app-book-appointment',
   templateUrl: './book-appointment.html',
   styleUrls: ['./book-appointment.css'],
-  imports: [FormsModule, CommonModule]
+  imports: [FormsModule]
 })
 export class BookAppointment implements OnInit {
   patients: any[] = [];  // Array to hold patients

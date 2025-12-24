@@ -1,607 +1,622 @@
-<div *ngIf="isLoggedIn" class="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
- <div class="flex items-center justify-between mb-6">
-   <h2 class="text-3xl font-bold text-blue-900">Consultation Form</h2>
-   <div class="text-sm text-gray-600">
-     <span class="font-semibold">Doctor:</span> {{ consultationData.consultingDoctor }} |
-     <span class="font-semibold">Date:</span> {{ consultationData.consultationDate }}
-   </div>
- </div>
-
- <!-- All Sections Header -->
- <div class="mb-8">
-   <h3 class="text-lg font-semibold text-blue-800 text-center">Complete Consultation Form</h3>
-   <p class="text-sm text-gray-600 text-center mt-2">Fill in all sections below.</p>
- </div>
-
-
-
- <!-- Success and Error Messages -->
- <div *ngIf="successMessage" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-   {{ successMessage }}
- </div>
- <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-   {{ errorMessage }}
- </div>
-
- <!-- Validation Warning for Patient ID -->
- <div *ngIf="!consultationData.patientId && (consultationData.patientName || consultationData.age || consultationData.gender)"
-      class="bg-amber-100 border border-amber-400 text-amber-700 px-4 py-3 rounded mb-4">
-   <i class="fas fa-exclamation-triangle mr-2"></i>
-   <strong>Patient ID is required.</strong> Please use the search button to find and select an existing patient, or ensure the Patient ID field is filled before saving.
- </div>
-
-
- <form (ngSubmit)="submitConsultation()">
-   <!-- Section 1: Patient Information -->
-   <div class="space-y-6 mb-8 p-6 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-     <h3 class="text-xl font-semibold text-blue-800 border-b pb-2">1. Patient Information</h3>
-
-     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">
-           Patient ID <span [ngClass]="getAsteriskClass('patientId')" class="text-lg no-print">*</span>
-         </label>
-         <div class="flex gap-2">
-           <input type="text" [(ngModel)]="consultationData.patientId" name="patientId" required
-                  (input)="onFieldChange('patientId')"
-                  placeholder="Type Ghana Card Number (e.g., GHA-7306072119-3) or patient name..."
-                  class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-           <button type="button" (click)="showPatientSearch = !showPatientSearch"
-                   class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 no-print">
-             Search Patients
-           </button>
-         </div>
-
-         <!-- Print version - show Ghana Card Number -->
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.patientId || 'Not specified' }}
-         </div>
-
-         <!-- Patient Search Instructions -->
-         <div *ngIf="showPatientSearch && !consultationData.patientId" class="absolute z-10 mt-1 w-96 bg-blue-50 border border-blue-200 rounded-lg shadow-lg p-3 mb-2">
-           <div class="text-sm text-blue-800">
-             <i class="fas fa-info-circle mr-2"></i>
-             <strong>How to select a patient:</strong>
-             <ol class="list-decimal list-inside mt-2 space-y-1 text-xs">
-               <li>Type the patient's Ghana Card Number, name, or phone number in the Patient ID field above</li>
-               <li>Click on a patient from the search results below to auto-fill all fields</li>
-               <li>The Patient ID will be set to the Ghana Card Number</li>
-             </ol>
-           </div>
-         </div>
-
-         <!-- Patient Search Results -->
-         <div *ngIf="showPatientSearch" class="absolute z-10 mt-1 w-96 bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto">
-           <div *ngFor="let patient of searchPatient(consultationData.patientId)" (click)="selectPatient(patient)"
-                class="p-3 hover:bg-gray-50 cursor-pointer border-b">
-             <div class="font-semibold">{{ patient.first_name }} {{ patient.last_name }}</div>
-             <div class="text-sm text-gray-600">
-               <strong>ID:</strong> {{ patient.ghana_card_number }} |
-               <strong>Age:</strong> {{ calculateAge(patient.date_of_birth) }} |
-               <strong>Phone:</strong> {{ patient.phone_number }}
-             </div>
-           </div>
-           <div *ngIf="searchPatient(consultationData.patientId).length === 0 && consultationData.patientId.length > 0"
-                class="p-3 text-gray-500">
-             No patients found matching "{{ consultationData.patientId }}"
-           </div>
-           <div *ngIf="!consultationData.patientId"
-                class="p-3 text-amber-600 bg-amber-50 border border-amber-200">
-             <i class="fas fa-exclamation-triangle mr-2"></i>
-             Please type a Ghana Card Number, name, or phone number above to search for patients.
-           </div>
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">
-           Full Name <span [ngClass]="getAsteriskClass('patientName')" class="text-lg no-print">*</span>
-         </label>
-         <input type="text" [(ngModel)]="consultationData.patientName" name="patientName" required
-                (input)="onFieldChange('patientName')"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-
-         <!-- Print version -->
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.patientName || 'Not specified' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">
-           Age <span [ngClass]="getAsteriskClass('age')" class="text-lg no-print">*</span>
-         </label>
-         <input type="number" [(ngModel)]="consultationData.age" name="age" min="1" max="150" required
-                (input)="onFieldChange('age')"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-
-         <!-- Print version -->
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.age || 'Not specified' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">
-           Gender <span [ngClass]="getAsteriskClass('gender')" class="text-lg no-print">*</span>
-         </label>
-         <select [(ngModel)]="consultationData.gender" name="gender" required
-                 (change)="onFieldChange('gender')"
-                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-           <option value="">Select Gender</option>
-           <option>Male</option>
-           <option>Female</option>
-           <option>Other</option>
-         </select>
-
-         <!-- Print version -->
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.gender || 'Not specified' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Phone Number</label>
-         <input type="tel" [(ngModel)]="consultationData.phone" name="phone"
-                (input)="onFieldChange('phone')"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-
-         <!-- Print version -->
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.phone || 'Not specified' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Email</label>
-         <input type="email" [(ngModel)]="consultationData.email" name="email"
-                (input)="onFieldChange('email')"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-
-         <!-- Print version -->
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.email || 'Not specified' }}
-         </div>
-       </div>
-     </div>
-
-     <div>
-       <label class="block text-gray-700 font-semibold mb-2">Address</label>
-       <textarea [(ngModel)]="consultationData.address" name="address" rows="2"
-                 (input)="onFieldChange('address')"
-                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-
-       <!-- Print version -->
-       <div class="print-only font-medium text-gray-900">
-         {{ consultationData.address || 'Not specified' }}
-       </div>
-     </div>
-   </div>
-
-   <!-- Section 2: Consultation Details -->
-   <div class="space-y-6 mb-8 p-6 bg-green-50 rounded-lg border-l-4 border-green-400">
-     <h3 class="text-xl font-semibold text-green-800 border-b pb-2">2. Consultation Details</h3>
-
-     <div>
-       <label class="block text-gray-700 font-semibold mb-2">
-         Consulting Doctor <span [ngClass]="getAsteriskClass('selectedDoctorId')" class="text-lg no-print">*</span>
-       </label>
-       <select [(ngModel)]="consultationData.selectedDoctorId" name="selectedDoctorId" required
-               (change)="onFieldChange('selectedDoctorId'); onDoctorChange()"
-               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-         <option value="">Select Doctor</option>
-         <option *ngFor="let doctor of doctors" [value]="doctor.doctor_id">
-           {{ doctor.first_name }} {{ doctor.last_name }} - {{ doctor.specialization || doctor.department }}
-         </option>
-       </select>
-
-       <!-- Print version -->
-       <div class="print-only font-medium text-gray-900">
-         {{ getSelectedDoctorName() || 'Not assigned' }}
-       </div>
-     </div>
-
-     <div>
-       <label class="block text-gray-700 font-semibold mb-2">
-         Chief Complaint <span [ngClass]="getAsteriskClass('chiefComplaint')" class="text-lg no-print">*</span>
-       </label>
-       <textarea [(ngModel)]="consultationData.chiefComplaint" name="chiefComplaint" rows="3" required
-                 (input)="onFieldChange('chiefComplaint')"
-                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                 placeholder="Main reason for visit..."></textarea>
-
-       <!-- Print version -->
-       <div class="print-only font-medium text-gray-900">
-         {{ consultationData.chiefComplaint || 'none' }}
-       </div>
-
-       <!-- Quick Symptom Selection -->
-       <div class="mt-2 no-print">
-         <div class="flex items-center justify-between mb-2">
-           <label class="block text-sm text-gray-600">Quick Add Symptoms:</label>
-           <button type="button" (click)="showSymptomManagement = !showSymptomManagement"
-                   class="text-xs text-blue-600 hover:text-blue-800">
-             Manage Symptoms
-           </button>
-         </div>
-         <div class="flex flex-wrap gap-2">
-           <button *ngFor="let symptom of getAllSymptoms()" type="button"
-                   (click)="addSymptom(symptom)"
-                   class="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full"
-                   [class.bg-blue-100]="isUserAddedSymptom(symptom)">
-             {{ symptom }}
-           </button>
-         </div>
-
-         <!-- Symptom Management Section -->
-         <div *ngIf="showSymptomManagement" class="mt-4 p-4 bg-gray-50 rounded-lg border no-print">
-           <h4 class="font-semibold text-sm mb-3">Add Custom Symptom</h4>
-           <div class="flex gap-2 mb-3">
-             <input type="text" [(ngModel)]="newSymptom" placeholder="Enter symptom name"
+@if (isLoggedIn) {
+  <div class="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-3xl font-bold text-blue-900">Consultation Form</h2>
+      <div class="text-sm text-gray-600">
+        <span class="font-semibold">Doctor:</span> {{ consultationData.consultingDoctor }} |
+        <span class="font-semibold">Date:</span> {{ consultationData.consultationDate }}
+      </div>
+    </div>
+    <!-- All Sections Header -->
+    <div class="mb-8">
+      <h3 class="text-lg font-semibold text-blue-800 text-center">Complete Consultation Form</h3>
+      <p class="text-sm text-gray-600 text-center mt-2">Fill in all sections below.</p>
+    </div>
+    <!-- Success and Error Messages -->
+    @if (successMessage) {
+      <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        {{ successMessage }}
+      </div>
+    }
+    @if (errorMessage) {
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ errorMessage }}
+      </div>
+    }
+    <!-- Validation Warning for Patient ID -->
+    @if (!consultationData.patientId && (consultationData.patientName || consultationData.age || consultationData.gender)) {
+      <div
+        class="bg-amber-100 border border-amber-400 text-amber-700 px-4 py-3 rounded mb-4">
+        <i class="fas fa-exclamation-triangle mr-2"></i>
+        <strong>Patient ID is required.</strong> Please use the search button to find and select an existing patient, or ensure the Patient ID field is filled before saving.
+      </div>
+    }
+    <form (ngSubmit)="submitConsultation()">
+      <!-- Section 1: Patient Information -->
+      <div class="space-y-6 mb-8 p-6 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+        <h3 class="text-xl font-semibold text-blue-800 border-b pb-2">1. Patient Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">
+              Patient ID <span [ngClass]="getAsteriskClass('patientId')" class="text-lg no-print">*</span>
+            </label>
+            <div class="flex gap-2">
+              <input type="text" [(ngModel)]="consultationData.patientId" name="patientId" required
+                (input)="onFieldChange('patientId')"
+                placeholder="Type Ghana Card Number (e.g., GHA-7306072119-3) or patient name..."
+                class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <button type="button" (click)="showPatientSearch = !showPatientSearch"
+                class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 no-print">
+                Search Patients
+              </button>
+            </div>
+            <!-- Print version - show Ghana Card Number -->
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.patientId || 'Not specified' }}
+            </div>
+            <!-- Patient Search Instructions -->
+            @if (showPatientSearch && !consultationData.patientId) {
+              <div class="absolute z-10 mt-1 w-96 bg-blue-50 border border-blue-200 rounded-lg shadow-lg p-3 mb-2">
+                <div class="text-sm text-blue-800">
+                  <i class="fas fa-info-circle mr-2"></i>
+                  <strong>How to select a patient:</strong>
+                  <ol class="list-decimal list-inside mt-2 space-y-1 text-xs">
+                    <li>Type the patient's Ghana Card Number, name, or phone number in the Patient ID field above</li>
+                    <li>Click on a patient from the search results below to auto-fill all fields</li>
+                    <li>The Patient ID will be set to the Ghana Card Number</li>
+                  </ol>
+                </div>
+              </div>
+            }
+            <!-- Patient Search Results -->
+            @if (showPatientSearch) {
+              <div class="absolute z-10 mt-1 w-96 bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                @for (patient of searchPatient(consultationData.patientId); track patient) {
+                  <div (click)="selectPatient(patient)"
+                    class="p-3 hover:bg-gray-50 cursor-pointer border-b">
+                    <div class="font-semibold">{{ patient.first_name }} {{ patient.last_name }}</div>
+                    <div class="text-sm text-gray-600">
+                      <strong>ID:</strong> {{ patient.ghana_card_number }} |
+                      <strong>Age:</strong> {{ calculateAge(patient.date_of_birth) }} |
+                      <strong>Phone:</strong> {{ patient.phone_number }}
+                    </div>
+                  </div>
+                }
+                @if (searchPatient(consultationData.patientId).length === 0 && consultationData.patientId.length > 0) {
+                  <div
+                    class="p-3 text-gray-500">
+                    No patients found matching "{{ consultationData.patientId }}"
+                  </div>
+                }
+                @if (!consultationData.patientId) {
+                  <div
+                    class="p-3 text-amber-600 bg-amber-50 border border-amber-200">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Please type a Ghana Card Number, name, or phone number above to search for patients.
+                  </div>
+                }
+              </div>
+            }
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">
+              Full Name <span [ngClass]="getAsteriskClass('patientName')" class="text-lg no-print">*</span>
+            </label>
+            <input type="text" [(ngModel)]="consultationData.patientName" name="patientName" required
+              (input)="onFieldChange('patientName')"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <!-- Print version -->
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.patientName || 'Not specified' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">
+              Age <span [ngClass]="getAsteriskClass('age')" class="text-lg no-print">*</span>
+            </label>
+            <input type="number" [(ngModel)]="consultationData.age" name="age" min="1" max="150" required
+              (input)="onFieldChange('age')"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <!-- Print version -->
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.age || 'Not specified' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">
+              Gender <span [ngClass]="getAsteriskClass('gender')" class="text-lg no-print">*</span>
+            </label>
+            <select [(ngModel)]="consultationData.gender" name="gender" required
+              (change)="onFieldChange('gender')"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <option value="">Select Gender</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+            <!-- Print version -->
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.gender || 'Not specified' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Phone Number</label>
+            <input type="tel" [(ngModel)]="consultationData.phone" name="phone"
+              (input)="onFieldChange('phone')"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <!-- Print version -->
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.phone || 'Not specified' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Email</label>
+            <input type="email" [(ngModel)]="consultationData.email" name="email"
+              (input)="onFieldChange('email')"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <!-- Print version -->
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.email || 'Not specified' }}
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">Address</label>
+          <textarea [(ngModel)]="consultationData.address" name="address" rows="2"
+            (input)="onFieldChange('address')"
+          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+          <!-- Print version -->
+          <div class="print-only font-medium text-gray-900">
+            {{ consultationData.address || 'Not specified' }}
+          </div>
+        </div>
+      </div>
+      <!-- Section 2: Consultation Details -->
+      <div class="space-y-6 mb-8 p-6 bg-green-50 rounded-lg border-l-4 border-green-400">
+        <h3 class="text-xl font-semibold text-green-800 border-b pb-2">2. Consultation Details</h3>
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">
+            Consulting Doctor <span [ngClass]="getAsteriskClass('selectedDoctorId')" class="text-lg no-print">*</span>
+          </label>
+          <select [(ngModel)]="consultationData.selectedDoctorId" name="selectedDoctorId" required
+            (change)="onFieldChange('selectedDoctorId'); onDoctorChange()"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <option value="">Select Doctor</option>
+            @for (doctor of doctors; track doctor) {
+              <option [value]="doctor.doctor_id">
+                {{ doctor.first_name }} {{ doctor.last_name }} - {{ doctor.specialization || doctor.department }}
+              </option>
+            }
+          </select>
+          <!-- Print version -->
+          <div class="print-only font-medium text-gray-900">
+            {{ getSelectedDoctorName() || 'Not assigned' }}
+          </div>
+        </div>
+        <div>
+          <label class="block text-gray-700 font-semibold mb-2">
+            Chief Complaint <span [ngClass]="getAsteriskClass('chiefComplaint')" class="text-lg no-print">*</span>
+          </label>
+          <textarea [(ngModel)]="consultationData.chiefComplaint" name="chiefComplaint" rows="3" required
+            (input)="onFieldChange('chiefComplaint')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          placeholder="Main reason for visit..."></textarea>
+          <!-- Print version -->
+          <div class="print-only font-medium text-gray-900">
+            {{ consultationData.chiefComplaint || 'none' }}
+          </div>
+          <!-- Quick Symptom Selection -->
+          <div class="mt-2 no-print">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-sm text-gray-600">Quick Add Symptoms:</label>
+              <button type="button" (click)="showSymptomManagement = !showSymptomManagement"
+                class="text-xs text-blue-600 hover:text-blue-800">
+                Manage Symptoms
+              </button>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              @for (symptom of getAllSymptoms(); track symptom) {
+                <button type="button"
+                  (click)="addSymptom(symptom)"
+                  class="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full"
+                  [class.bg-blue-100]="isUserAddedSymptom(symptom)">
+                  {{ symptom }}
+                </button>
+              }
+            </div>
+            <!-- Symptom Management Section -->
+            @if (showSymptomManagement) {
+              <div class="mt-4 p-4 bg-gray-50 rounded-lg border no-print">
+                <h4 class="font-semibold text-sm mb-3">Add Custom Symptom</h4>
+                <div class="flex gap-2 mb-3">
+                  <input type="text" [(ngModel)]="newSymptom" placeholder="Enter symptom name"
                     class="w-64 px-3 py-1 text-sm border rounded">
-             <button type="button" (click)="addCustomSymptom()"
-                     [disabled]="savingSymptom || !newSymptom.trim()"
-                     class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:bg-gray-400">
-               <span *ngIf="savingSymptom">Adding...</span>
-               <span *ngIf="!savingSymptom">Add</span>
-             </button>
-           </div>
-           <div *ngIf="loadingSymptoms" class="text-center py-2">
-             <span class="text-sm text-gray-600">Loading symptoms...</span>
-           </div>
-           <div class="space-y-2">
-             <h5 class="font-medium text-xs text-gray-700">User-Added Symptoms:</h5>
-             <div class="flex flex-wrap gap-2">
-               <span *ngFor="let symptom of symptoms"
-                     class="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-                 {{ symptom.name }}
-               </span>
-             </div>
-           </div>
-         </div>
-       </div>
-     </div>
-
-     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">History of Present Illness</label>
-         <textarea [(ngModel)]="consultationData.historyOfPresentIllness" name="historyOfPresentIllness" rows="3"
-                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.historyOfPresentIllness || 'none' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Past Medical History</label>
-         <textarea [(ngModel)]="consultationData.pastMedicalHistory" name="pastMedicalHistory" rows="3"
-                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.pastMedicalHistory || 'none' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Current Medications</label>
-         <textarea [(ngModel)]="consultationData.currentMedications" name="currentMedications" rows="2"
-                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.currentMedications || 'none' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Allergies</label>
-         <textarea [(ngModel)]="consultationData.allergies" name="allergies" rows="2"
-                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                   placeholder="Drug allergies, food allergies, etc."></textarea>
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.allergies || 'none' }}
-         </div>
-       </div>
-     </div>
-   </div>
-
-   <!-- Section 3: Vital Signs -->
-   <div class="space-y-6 mb-8 p-6 bg-purple-50 rounded-lg border-l-4 border-purple-400">
-     <h3 class="text-xl font-semibold text-purple-800 border-b pb-2">3. Vital Signs</h3>
-
-     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Blood Pressure (mmHg)</label>
-         <input type="text" [(ngModel)]="consultationData.bloodPressure" name="bloodPressure"
-                (input)="onFieldChange('bloodPressure')"
-                placeholder="e.g., 120/80"
+                  <button type="button" (click)="addCustomSymptom()"
+                    [disabled]="savingSymptom || !newSymptom.trim()"
+                    class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:bg-gray-400">
+                    @if (savingSymptom) {
+                      <span>Adding...</span>
+                    }
+                    @if (!savingSymptom) {
+                      <span>Add</span>
+                    }
+                  </button>
+                </div>
+                @if (loadingSymptoms) {
+                  <div class="text-center py-2">
+                    <span class="text-sm text-gray-600">Loading symptoms...</span>
+                  </div>
+                }
+                <div class="space-y-2">
+                  <h5 class="font-medium text-xs text-gray-700">User-Added Symptoms:</h5>
+                  <div class="flex flex-wrap gap-2">
+                    @for (symptom of symptoms; track symptom) {
+                      <span
+                        class="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                        {{ symptom.name }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">History of Present Illness</label>
+            <textarea [(ngModel)]="consultationData.historyOfPresentIllness" name="historyOfPresentIllness" rows="3"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.historyOfPresentIllness || 'none' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Past Medical History</label>
+            <textarea [(ngModel)]="consultationData.pastMedicalHistory" name="pastMedicalHistory" rows="3"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.pastMedicalHistory || 'none' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Current Medications</label>
+            <textarea [(ngModel)]="consultationData.currentMedications" name="currentMedications" rows="2"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.currentMedications || 'none' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Allergies</label>
+            <textarea [(ngModel)]="consultationData.allergies" name="allergies" rows="2"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            placeholder="Drug allergies, food allergies, etc."></textarea>
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.allergies || 'none' }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Section 3: Vital Signs -->
+      <div class="space-y-6 mb-8 p-6 bg-purple-50 rounded-lg border-l-4 border-purple-400">
+        <h3 class="text-xl font-semibold text-purple-800 border-b pb-2">3. Vital Signs</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Blood Pressure (mmHg)</label>
+            <input type="text" [(ngModel)]="consultationData.bloodPressure" name="bloodPressure"
+              (input)="onFieldChange('bloodPressure')"
+              placeholder="e.g., 120/80"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.bloodPressure || 'none' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Temperature (°C)</label>
+            <input type="number" [(ngModel)]="consultationData.temperature" name="temperature" step="0.1"
+              (input)="onFieldChange('temperature')"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.temperature || 'none' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Pulse (bpm)</label>
+            <input type="number" [(ngModel)]="consultationData.pulse" name="pulse"
+              (input)="onFieldChange('pulse')"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.pulse || 'none' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Respiratory Rate (breaths/min)</label>
+            <input type="number" [(ngModel)]="consultationData.respiratoryRate" name="respiratoryRate"
+              (input)="onFieldChange('respiratoryRate')"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.respiratoryRate || 'none' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Oxygen Saturation (%)</label>
+            <input type="number" [(ngModel)]="consultationData.oxygenSaturation" name="oxygenSaturation" min="0" max="100"
+              (input)="onFieldChange('oxygenSaturation')"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.oxygenSaturation || 'none' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Weight (kg)</label>
+            <input type="number" [(ngModel)]="consultationData.weight" name="weight" step="0.1"
+              (input)="onFieldChange('weight')"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.weight || 'none' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Height (cm)</label>
+            <input type="number" [(ngModel)]="consultationData.height" name="height"
+              (input)="onFieldChange('height')"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.height || 'none' }}
+            </div>
+          </div>
+          @if (calculateBMI() > 0 && calculateBMI() < 100) {
+            <div>
+              <label class="block text-gray-700 font-semibold mb-2">BMI</label>
+              <div class="w-full px-4 py-2 border rounded-lg bg-gray-100 text-center font-semibold">
+                {{ calculateBMI() }}
+                @if (calculateBMI() < 18.5) {
+                  <span class="text-blue-600 ml-2">(Underweight)</span>
+                }
+                @if (calculateBMI() >= 18.5 && calculateBMI() < 25) {
+                  <span class="text-green-600 ml-2">(Normal)</span>
+                }
+                @if (calculateBMI() >= 25 && calculateBMI() < 30) {
+                  <span class="text-yellow-600 ml-2">(Overweight)</span>
+                }
+                @if (calculateBMI() >= 30) {
+                  <span class="text-red-600 ml-2">(Obese)</span>
+                }
+              </div>
+              <!-- Print version -->
+              <div class="print-only font-medium text-gray-900">
+                BMI: {{ calculateBMI() }}
+                @if (calculateBMI() < 18.5) {
+                  <span>(Underweight)</span>
+                }
+                @if (calculateBMI() >= 18.5 && calculateBMI() < 25) {
+                  <span>(Normal)</span>
+                }
+                @if (calculateBMI() >= 25 && calculateBMI() < 30) {
+                  <span>(Overweight)</span>
+                }
+                @if (calculateBMI() >= 30) {
+                  <span>(Obese)</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+      <!-- Section 4: Physical Examination -->
+      <div class="space-y-6 mb-8 p-6 bg-orange-50 rounded-lg border-l-4 border-orange-400">
+        <h3 class="text-xl font-semibold text-orange-800 border-b pb-2">4. Physical Examination</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">General Appearance</label>
+            <textarea [(ngModel)]="consultationData.generalAppearance" name="generalAppearance" rows="2"
+              (input)="onFieldChange('generalAppearance')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.generalAppearance || 'none' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Cardiovascular</label>
+            <textarea [(ngModel)]="consultationData.cardiovascular" name="cardiovascular" rows="2"
+              (input)="onFieldChange('cardiovascular')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.cardiovascular || 'none' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Respiratory</label>
+            <textarea [(ngModel)]="consultationData.respiratory" name="respiratory" rows="2"
+              (input)="onFieldChange('respiratory')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.respiratory || 'none' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Abdominal</label>
+            <textarea [(ngModel)]="consultationData.abdominal" name="abdominal" rows="2"
+              (input)="onFieldChange('abdominal')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.abdominal || 'none' }}
+            </div>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-gray-700 font-semibold mb-2">Neurological</label>
+            <textarea [(ngModel)]="consultationData.neurological" name="neurological" rows="2"
+              (input)="onFieldChange('neurological')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.neurological || 'none' }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Section 5: Assessment & Treatment -->
+      <div class="space-y-6 mb-8 p-6 bg-teal-50 rounded-lg border-l-4 border-teal-400">
+        <h3 class="text-xl font-semibold text-teal-800 border-b pb-2">5. Assessment & Treatment Plan</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">
+              Diagnosis <span [ngClass]="getAsteriskClass('diagnosis')" class="text-lg no-print">*</span>
+            </label>
+            <textarea [(ngModel)]="consultationData.diagnosis" name="diagnosis" rows="3" required
+              (input)="onFieldChange('diagnosis')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            <!-- Print version -->
+            <div class="print-only font-medium text-gray-900">
+              {{ getDisplayValue('diagnosis') }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Treatment Plan</label>
+            <textarea [(ngModel)]="consultationData.treatmentPlan" name="treatmentPlan" rows="3"
+              (input)="onFieldChange('treatmentPlan')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            <!-- Print version -->
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.treatmentPlan || 'none' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Medications</label>
+            <textarea [(ngModel)]="consultationData.medications" name="medications" rows="3"
+              (input)="onFieldChange('medications')"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            placeholder="Select medications from dropdown above..."></textarea>
+            <!-- Print version -->
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.medications || 'none' }}
+            </div>
+            <!-- Medication Selection from API -->
+            <div class="mt-2 no-print">
+              <label class="block text-sm text-gray-600 mb-2">Select Medications:</label>
+              <div class="flex flex-wrap gap-2">
+                <select class="px-3 py-1 text-sm border rounded" (change)="onMedicationSelect($event)" #medSelect
+                  [disabled]="medicines.length === 0">
+                  <option value="">Choose medication...</option>
+                  @for (medicine of medicines; track medicine) {
+                    <option [value]="medicine.name">
+                      {{ medicine.name }} - GH₵{{ medicine.price }} (Stock: {{ medicine.stock_quantity }})
+                    </option>
+                  }
+                </select>
+                <button type="button" (click)="medSelect.value = ''"
+                  class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
+                  [disabled]="medicines.length === 0">
+                  Clear
+                </button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Follow-up Instructions</label>
+            <textarea [(ngModel)]="consultationData.followUpInstructions" name="followUpInstructions" rows="3"
+              (input)="onFieldChange('followUpInstructions')"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            <!-- Print version -->
+            <div class="print-only font-medium text-gray-900">
+              {{ consultationData.followUpInstructions || 'none' }}
+            </div>
+          </div>
+        </div>
+        <!-- Referral Section -->
+        <div class="border-t pt-6">
+          <div class="flex items-center space-x-4 mb-4">
+            <input type="checkbox" [(ngModel)]="consultationData.referralNeeded" name="referralNeeded" id="referralNeeded" class="no-print">
+            <label for="referralNeeded" class="text-gray-700 font-semibold">Referral Needed</label>
+          </div>
+          @if (consultationData.referralNeeded) {
+            <div class="no-print">
+              <label class="block text-gray-700 font-semibold mb-2">Referral Department</label>
+              <select [(ngModel)]="consultationData.referralDepartment" name="referralDepartment"
+                (change)="onFieldChange('referralDepartment')"
                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.bloodPressure || 'none' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Temperature (°C)</label>
-         <input type="number" [(ngModel)]="consultationData.temperature" name="temperature" step="0.1"
-                (input)="onFieldChange('temperature')"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.temperature || 'none' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Pulse (bpm)</label>
-         <input type="number" [(ngModel)]="consultationData.pulse" name="pulse"
-                (input)="onFieldChange('pulse')"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.pulse || 'none' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Respiratory Rate (breaths/min)</label>
-         <input type="number" [(ngModel)]="consultationData.respiratoryRate" name="respiratoryRate"
-                (input)="onFieldChange('respiratoryRate')"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.respiratoryRate || 'none' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Oxygen Saturation (%)</label>
-         <input type="number" [(ngModel)]="consultationData.oxygenSaturation" name="oxygenSaturation" min="0" max="100"
-                (input)="onFieldChange('oxygenSaturation')"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.oxygenSaturation || 'none' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Weight (kg)</label>
-         <input type="number" [(ngModel)]="consultationData.weight" name="weight" step="0.1"
-                (input)="onFieldChange('weight')"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.weight || 'none' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Height (cm)</label>
-         <input type="number" [(ngModel)]="consultationData.height" name="height"
-                (input)="onFieldChange('height')"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.height || 'none' }}
-         </div>
-       </div>
-       <div *ngIf="calculateBMI() > 0 && calculateBMI() < 100">
-         <label class="block text-gray-700 font-semibold mb-2">BMI</label>
-         <div class="w-full px-4 py-2 border rounded-lg bg-gray-100 text-center font-semibold">
-           {{ calculateBMI() }}
-           <span *ngIf="calculateBMI() < 18.5" class="text-blue-600 ml-2">(Underweight)</span>
-           <span *ngIf="calculateBMI() >= 18.5 && calculateBMI() < 25" class="text-green-600 ml-2">(Normal)</span>
-           <span *ngIf="calculateBMI() >= 25 && calculateBMI() < 30" class="text-yellow-600 ml-2">(Overweight)</span>
-           <span *ngIf="calculateBMI() >= 30" class="text-red-600 ml-2">(Obese)</span>
-         </div>
-         <!-- Print version -->
-         <div class="print-only font-medium text-gray-900">
-           BMI: {{ calculateBMI() }}
-           <span *ngIf="calculateBMI() < 18.5">(Underweight)</span>
-           <span *ngIf="calculateBMI() >= 18.5 && calculateBMI() < 25">(Normal)</span>
-           <span *ngIf="calculateBMI() >= 25 && calculateBMI() < 30">(Overweight)</span>
-           <span *ngIf="calculateBMI() >= 30">(Obese)</span>
-         </div>
-       </div>
-     </div>
-   </div>
-
-   <!-- Section 4: Physical Examination -->
-   <div class="space-y-6 mb-8 p-6 bg-orange-50 rounded-lg border-l-4 border-orange-400">
-     <h3 class="text-xl font-semibold text-orange-800 border-b pb-2">4. Physical Examination</h3>
-
-     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">General Appearance</label>
-         <textarea [(ngModel)]="consultationData.generalAppearance" name="generalAppearance" rows="2"
-                   (input)="onFieldChange('generalAppearance')"
-                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.generalAppearance || 'none' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Cardiovascular</label>
-         <textarea [(ngModel)]="consultationData.cardiovascular" name="cardiovascular" rows="2"
-                   (input)="onFieldChange('cardiovascular')"
-                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.cardiovascular || 'none' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Respiratory</label>
-         <textarea [(ngModel)]="consultationData.respiratory" name="respiratory" rows="2"
-                   (input)="onFieldChange('respiratory')"
-                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.respiratory || 'none' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Abdominal</label>
-         <textarea [(ngModel)]="consultationData.abdominal" name="abdominal" rows="2"
-                   (input)="onFieldChange('abdominal')"
-                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.abdominal || 'none' }}
-         </div>
-       </div>
-       <div class="md:col-span-2">
-         <label class="block text-gray-700 font-semibold mb-2">Neurological</label>
-         <textarea [(ngModel)]="consultationData.neurological" name="neurological" rows="2"
-                   (input)="onFieldChange('neurological')"
-                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.neurological || 'none' }}
-         </div>
-       </div>
-     </div>
-   </div>
-
-   <!-- Section 5: Assessment & Treatment -->
-   <div class="space-y-6 mb-8 p-6 bg-teal-50 rounded-lg border-l-4 border-teal-400">
-     <h3 class="text-xl font-semibold text-teal-800 border-b pb-2">5. Assessment & Treatment Plan</h3>
-
-     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">
-           Diagnosis <span [ngClass]="getAsteriskClass('diagnosis')" class="text-lg no-print">*</span>
-         </label>
-         <textarea [(ngModel)]="consultationData.diagnosis" name="diagnosis" rows="3" required
-                   (input)="onFieldChange('diagnosis')"
-                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-
-         <!-- Print version -->
-         <div class="print-only font-medium text-gray-900">
-           {{ getDisplayValue('diagnosis') }}
-         </div>
-
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Treatment Plan</label>
-         <textarea [(ngModel)]="consultationData.treatmentPlan" name="treatmentPlan" rows="3"
-                   (input)="onFieldChange('treatmentPlan')"
-                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-
-         <!-- Print version -->
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.treatmentPlan || 'none' }}
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Medications</label>
-         <textarea [(ngModel)]="consultationData.medications" name="medications" rows="3"
-                   (input)="onFieldChange('medications')"
-                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                   placeholder="Select medications from dropdown above..."></textarea>
-
-         <!-- Print version -->
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.medications || 'none' }}
-         </div>
-
-         <!-- Medication Selection from API -->
-         <div class="mt-2 no-print">
-           <label class="block text-sm text-gray-600 mb-2">Select Medications:</label>
-           <div class="flex flex-wrap gap-2">
-             <select class="px-3 py-1 text-sm border rounded" (change)="onMedicationSelect($event)" #medSelect
-                     [disabled]="medicines.length === 0">
-               <option value="">Choose medication...</option>
-               <option *ngFor="let medicine of medicines" [value]="medicine.name">
-                 {{ medicine.name }} - GH₵{{ medicine.price }} (Stock: {{ medicine.stock_quantity }})
-               </option>
-             </select>
-             <button type="button" (click)="medSelect.value = ''"
-                     class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
-                     [disabled]="medicines.length === 0">
-               Clear
-             </button>
-           </div>
-         </div>
-       </div>
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Follow-up Instructions</label>
-         <textarea [(ngModel)]="consultationData.followUpInstructions" name="followUpInstructions" rows="3"
-                   (input)="onFieldChange('followUpInstructions')"
-                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-
-         <!-- Print version -->
-         <div class="print-only font-medium text-gray-900">
-           {{ consultationData.followUpInstructions || 'none' }}
-         </div>
-       </div>
-     </div>
-
-     <!-- Referral Section -->
-     <div class="border-t pt-6">
-       <div class="flex items-center space-x-4 mb-4">
-         <input type="checkbox" [(ngModel)]="consultationData.referralNeeded" name="referralNeeded" id="referralNeeded" class="no-print">
-         <label for="referralNeeded" class="text-gray-700 font-semibold">Referral Needed</label>
-       </div>
-
-       <div *ngIf="consultationData.referralNeeded" class="no-print">
-         <label class="block text-gray-700 font-semibold mb-2">Referral Department</label>
-         <select [(ngModel)]="consultationData.referralDepartment" name="referralDepartment"
-                 (change)="onFieldChange('referralDepartment')"
-                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-           <option value="">Select Department</option>
-           <option>Cardiology</option>
-           <option>Emergency</option>
-           <option>Laboratory</option>
-           <option>Pediatrics</option>
-           <option>Pharmacy</option>
-           <option>Surgery</option>
-         </select>
-       </div>
-
-       <!-- Print version for referral -->
-       <div class="print-only" *ngIf="consultationData.referralNeeded">
-         <strong>Referral Needed:</strong> Yes<br>
-         <strong>Referral Department:</strong> {{ consultationData.referralDepartment || 'none' }}
-       </div>
-     </div>
-
-     <!-- Consultation Status -->
-     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Consultation Status</label>
-         <select [(ngModel)]="consultationData.status" name="status"
-                 (change)="onFieldChange('status')"
-                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-           <option value="completed">Completed</option>
-           <option value="pending">Pending</option>
-           <option value="cancelled">Cancelled</option>
-         </select>
-
-         <!-- Print version for status -->
-         <div class="print-only font-medium text-gray-900">
-           <strong>Consultation Status:</strong> {{ consultationData.status || 'Completed' }}
-         </div>
-       </div>
-
-       <div>
-         <label class="block text-gray-700 font-semibold mb-2">Consultation Urgency</label>
-         <select [(ngModel)]="consultationData.urgency" name="urgency"
-                 (change)="onFieldChange('urgency')"
-                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-           <option value="routine">Routine</option>
-           <option value="urgent">Urgent</option>
-           <option value="emergency">Emergency</option>
-         </select>
-
-         <!-- Print version for urgency -->
-         <div class="print-only font-medium text-gray-900">
-           <strong>Consultation Urgency:</strong> {{ consultationData.urgency || 'Routine' }}
-         </div>
-       </div>
-     </div>
-
-     <!-- Action Buttons -->
-     <div class="border-t pt-6">
-       <div class="flex justify-between">
-         <div class="space-x-4">
-           <button type="button" (click)="printConsultation()"
-                   class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700">
-             Print Consultation
-           </button>
-           <button type="button" (click)="resetForm()"
-                   class="bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700">
-             Reset Form
-           </button>
-         </div>
-         <button type="submit" [disabled]="isLoading || !isFormValid() || !consultationData.patientId"
-                 [class]="isLoading || !isFormValid() || !consultationData.patientId ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'"
-                 class="text-white px-6 py-2 rounded-lg transition duration-200">
-           <span *ngIf="isLoading">Saving...</span>
-           <span *ngIf="!isLoading && isFormValid() && consultationData.patientId">Save Consultation</span>
-           <span *ngIf="!isLoading && (!isFormValid() || !consultationData.patientId)">Complete Required Fields</span>
-         </button>
-       </div>
-     </div>
-   </div>
-
-   <!-- Management Sections (hidden during print) -->
-   <div class="no-print">
-     <!-- Only Symptom Management here -->
-   </div>
- </form>
-</div>
+                <option value="">Select Department</option>
+                <option>Cardiology</option>
+                <option>Emergency</option>
+                <option>Laboratory</option>
+                <option>Pediatrics</option>
+                <option>Pharmacy</option>
+                <option>Surgery</option>
+              </select>
+            </div>
+          }
+          <!-- Print version for referral -->
+          @if (consultationData.referralNeeded) {
+            <div class="print-only">
+              <strong>Referral Needed:</strong> Yes<br>
+              <strong>Referral Department:</strong> {{ consultationData.referralDepartment || 'none' }}
+            </div>
+          }
+        </div>
+        <!-- Consultation Status -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Consultation Status</label>
+            <select [(ngModel)]="consultationData.status" name="status"
+              (change)="onFieldChange('status')"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <option value="completed">Completed</option>
+              <option value="pending">Pending</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <!-- Print version for status -->
+            <div class="print-only font-medium text-gray-900">
+              <strong>Consultation Status:</strong> {{ consultationData.status || 'Completed' }}
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-700 font-semibold mb-2">Consultation Urgency</label>
+            <select [(ngModel)]="consultationData.urgency" name="urgency"
+              (change)="onFieldChange('urgency')"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <option value="routine">Routine</option>
+              <option value="urgent">Urgent</option>
+              <option value="emergency">Emergency</option>
+            </select>
+            <!-- Print version for urgency -->
+            <div class="print-only font-medium text-gray-900">
+              <strong>Consultation Urgency:</strong> {{ consultationData.urgency || 'Routine' }}
+            </div>
+          </div>
+        </div>
+        <!-- Action Buttons -->
+        <div class="border-t pt-6">
+          <div class="flex justify-between">
+            <div class="space-x-4">
+              <button type="button" (click)="printConsultation()"
+                class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700">
+                Print Consultation
+              </button>
+              <button type="button" (click)="resetForm()"
+                class="bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700">
+                Reset Form
+              </button>
+            </div>
+            <button type="submit" [disabled]="isLoading || !isFormValid() || !consultationData.patientId"
+              [class]="isLoading || !isFormValid() || !consultationData.patientId ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'"
+              class="text-white px-6 py-2 rounded-lg transition duration-200">
+              @if (isLoading) {
+                <span>Saving...</span>
+              }
+              @if (!isLoading && isFormValid() && consultationData.patientId) {
+                <span>Save Consultation</span>
+              }
+              @if (!isLoading && (!isFormValid() || !consultationData.patientId)) {
+                <span>Complete Required Fields</span>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Management Sections (hidden during print) -->
+      <div class="no-print">
+        <!-- Only Symptom Management here -->
+      </div>
+    </form>
+  </div>
+}

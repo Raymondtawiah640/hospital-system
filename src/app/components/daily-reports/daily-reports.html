@@ -9,12 +9,16 @@
   </div>
 
   <!-- Success and Error Messages -->
-  <div *ngIf="successMessage" class="max-w-7xl mx-auto text-green-500 text-center mb-4">
-    {{ successMessage }}
-  </div>
-  <div *ngIf="errorMessage" class="max-w-7xl mx-auto text-red-500 text-center mb-4">
-    {{ errorMessage }}
-  </div>
+  @if (successMessage) {
+    <div class="max-w-7xl mx-auto text-green-500 text-center mb-4">
+      {{ successMessage }}
+    </div>
+  }
+  @if (errorMessage) {
+    <div class="max-w-7xl mx-auto text-red-500 text-center mb-4">
+      {{ errorMessage }}
+    </div>
+  }
 
   <!-- Date Selector -->
   <div class="max-w-7xl mx-auto mb-6">
@@ -62,20 +66,24 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
-          <tr *ngFor="let test of reportData.labTests" class="hover:bg-gray-50">
-            <td class="px-4 py-2">{{ test.patient_name }}</td>
-            <td class="px-4 py-2">{{ test.doctor_name }}</td>
-            <td class="px-4 py-2">{{ test.test_name }}</td>
-            <td class="px-4 py-2">
-              <span [ngClass]="test.status === 'completed' ? 'text-green-600 font-semibold' : 'text-yellow-600 font-semibold'">
-                {{ test.status | titlecase }}
-              </span>
-            </td>
-            <td class="px-4 py-2">{{ test.type }}</td>
-          </tr>
-          <tr *ngIf="reportData.labTests.length === 0">
-            <td colspan="5" class="text-center py-4 text-gray-500">No lab tests for this date.</td>
-          </tr>
+          @for (test of reportData.labTests; track test) {
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-2">{{ test.patient_name }}</td>
+              <td class="px-4 py-2">{{ test.doctor_name }}</td>
+              <td class="px-4 py-2">{{ test.test_name }}</td>
+              <td class="px-4 py-2">
+                <span [ngClass]="test.status === 'completed' ? 'text-green-600 font-semibold' : 'text-yellow-600 font-semibold'">
+                  {{ test.status | titlecase }}
+                </span>
+              </td>
+              <td class="px-4 py-2">{{ test.type }}</td>
+            </tr>
+          }
+          @if (reportData.labTests.length === 0) {
+            <tr>
+              <td colspan="5" class="text-center py-4 text-gray-500">No lab tests for this date.</td>
+            </tr>
+          }
         </tbody>
       </table>
     </div>
@@ -94,14 +102,18 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
-          <tr *ngFor="let prescription of reportData.prescriptions" class="hover:bg-gray-50">
-            <td class="px-4 py-2">{{ prescription.patient_name }}</td>
-            <td class="px-4 py-2">{{ prescription.doctor_name }}</td>
-            <td class="px-4 py-2">{{ prescription.medicines }}</td>
-          </tr>
-          <tr *ngIf="reportData.prescriptions.length === 0">
-            <td colspan="3" class="text-center py-4 text-gray-500">No prescriptions for this date.</td>
-          </tr>
+          @for (prescription of reportData.prescriptions; track prescription) {
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-2">{{ prescription.patient_name }}</td>
+              <td class="px-4 py-2">{{ prescription.doctor_name }}</td>
+              <td class="px-4 py-2">{{ prescription.medicines }}</td>
+            </tr>
+          }
+          @if (reportData.prescriptions.length === 0) {
+            <tr>
+              <td colspan="3" class="text-center py-4 text-gray-500">No prescriptions for this date.</td>
+            </tr>
+          }
         </tbody>
       </table>
     </div>
@@ -120,18 +132,22 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
-          <tr *ngFor="let bill of reportData.bills" class="hover:bg-gray-50">
-            <td class="px-4 py-2">{{ bill.patient_name }}</td>
-            <td class="px-4 py-2">GH₵{{ bill.amount }}</td>
-            <td class="px-4 py-2">
-              <span [ngClass]="bill.status === 'paid' ? 'text-green-600 font-semibold' : 'text-yellow-600 font-semibold'">
-                {{ bill.status | titlecase }}
-              </span>
-            </td>
-          </tr>
-          <tr *ngIf="reportData.bills.length === 0">
-            <td colspan="3" class="text-center py-4 text-gray-500">No bills for this date.</td>
-          </tr>
+          @for (bill of reportData.bills; track bill) {
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-2">{{ bill.patient_name }}</td>
+              <td class="px-4 py-2">GH₵{{ bill.amount }}</td>
+              <td class="px-4 py-2">
+                <span [ngClass]="bill.status === 'paid' ? 'text-green-600 font-semibold' : 'text-yellow-600 font-semibold'">
+                  {{ bill.status | titlecase }}
+                </span>
+              </td>
+            </tr>
+          }
+          @if (reportData.bills.length === 0) {
+            <tr>
+              <td colspan="3" class="text-center py-4 text-gray-500">No bills for this date.</td>
+            </tr>
+          }
         </tbody>
       </table>
     </div>

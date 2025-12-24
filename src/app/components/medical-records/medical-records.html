@@ -9,12 +9,16 @@
   </div>
 
   <!-- Success and Error Messages -->
-  <div *ngIf="successMessage" class="max-w-7xl mx-auto text-green-500 text-center mb-4">
-    {{ successMessage }}
-  </div>
-  <div *ngIf="errorMessage" class="max-w-7xl mx-auto text-red-500 text-center mb-4">
-    {{ errorMessage }}
-  </div>
+  @if (successMessage) {
+    <div class="max-w-7xl mx-auto text-green-500 text-center mb-4">
+      {{ successMessage }}
+    </div>
+  }
+  @if (errorMessage) {
+    <div class="max-w-7xl mx-auto text-red-500 text-center mb-4">
+      {{ errorMessage }}
+    </div>
+  }
 
   <!-- Search and Date Filters -->
   <div class="max-w-7xl mx-auto mb-6 space-y-4">
@@ -47,38 +51,46 @@
       </thead>
       <tbody class="divide-y divide-gray-200">
         <!-- Loading row -->
-        <tr *ngIf="isLoading">
-          <td colspan="6" class="text-center py-4 text-gray-500">
-            <div class="flex justify-center items-center">
-              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-              <span class="ml-2">Loading medical records...</span>
-            </div>
-          </td>
-        </tr>
+        @if (isLoading) {
+          <tr>
+            <td colspan="6" class="text-center py-4 text-gray-500">
+              <div class="flex justify-center items-center">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <span class="ml-2">Loading medical records...</span>
+              </div>
+            </td>
+          </tr>
+        }
 
         <!-- Error row -->
-        <tr *ngIf="errorMessage && !isLoading">
-          <td colspan="6" class="text-center py-4 text-red-500">{{ errorMessage }}</td>
-        </tr>
+        @if (errorMessage && !isLoading) {
+          <tr>
+            <td colspan="6" class="text-center py-4 text-red-500">{{ errorMessage }}</td>
+          </tr>
+        }
 
         <!-- Data rows -->
-        <tr *ngFor="let record of filteredRecords" class="hover:bg-gray-50">
-          <td class="px-4 py-2">{{ record.patient_first_name }} {{ record.patient_last_name }}</td>
-          <td class="px-4 py-2">{{ record.doctor_first_name }} {{ record.doctor_last_name }}</td>
-          <td class="px-4 py-2">{{ record.name }}</td>
-          <td class="px-4 py-2">{{ record.date }}</td>
-          <td class="px-4 py-2">
-            <span [ngClass]="record.status === 'completed' ? 'text-green-600 font-semibold' : 'text-yellow-600 font-semibold'">
-              {{ record.status | titlecase }}
-            </span>
-          </td>
-          <td class="px-4 py-2">{{ record.type }}</td>
-        </tr>
+        @for (record of filteredRecords; track record) {
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-2">{{ record.patient_first_name }} {{ record.patient_last_name }}</td>
+            <td class="px-4 py-2">{{ record.doctor_first_name }} {{ record.doctor_last_name }}</td>
+            <td class="px-4 py-2">{{ record.name }}</td>
+            <td class="px-4 py-2">{{ record.date }}</td>
+            <td class="px-4 py-2">
+              <span [ngClass]="record.status === 'completed' ? 'text-green-600 font-semibold' : 'text-yellow-600 font-semibold'">
+                {{ record.status | titlecase }}
+              </span>
+            </td>
+            <td class="px-4 py-2">{{ record.type }}</td>
+          </tr>
+        }
 
         <!-- No records row -->
-        <tr *ngIf="!isLoading && !errorMessage && filteredRecords.length === 0">
-          <td colspan="6" class="text-center py-4 text-gray-500">No medical records found.</td>
-        </tr>
+        @if (!isLoading && !errorMessage && filteredRecords.length === 0) {
+          <tr>
+            <td colspan="6" class="text-center py-4 text-gray-500">No medical records found.</td>
+          </tr>
+        }
       </tbody>
     </table>
   </div>

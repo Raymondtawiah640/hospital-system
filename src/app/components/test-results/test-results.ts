@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';  // Import FormsModule to use ngModel
 import { AuthService } from '../../services/auth';  // Import your AuthService
 import { Router } from '@angular/router';  // Import Router for redirection
@@ -10,7 +10,7 @@ import { Router } from '@angular/router';  // Import Router for redirection
   templateUrl: './test-results.html',
   styleUrls: ['./test-results.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule]  // Add FormsModule for ngModel
+  imports: [FormsModule]  // Add FormsModule for ngModel
 })
 export class TestResults implements OnInit {
   testResults: any[] = [];  // Array to hold all test results

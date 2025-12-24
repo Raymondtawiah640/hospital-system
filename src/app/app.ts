@@ -1,5 +1,5 @@
 import { Component, computed, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule, Router, NavigationStart, NavigationEnd } from '@angular/router';
 import { Navbar } from './components/navbar/navbar';
 import { Footer } from './components/footer/footer';
@@ -11,7 +11,7 @@ import { AuthService } from './services/auth';
   templateUrl: './app.html',
   styleUrls: ['./app.css'],
   standalone: true,
-  imports: [CommonModule, RouterModule, Navbar, Footer, Loading]
+  imports: [RouterModule, Navbar, Footer, Loading]
 })
 export class App {
   constructor(public auth: AuthService, private router: Router) {

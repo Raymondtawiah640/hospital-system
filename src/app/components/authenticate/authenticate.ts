@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 
 interface Staff {
   staff_id: string;
@@ -13,7 +13,7 @@ interface Staff {
 
 @Component({
   selector: 'app-authenticate',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule],
   templateUrl: './authenticate.html',
   styleUrl: './authenticate.css'
 })

@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';  // Ensure you have the AuthService
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms'; // <-- Import FormsModule
 
 @Component({
@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms'; // <-- Import FormsModule
   templateUrl: './prescriptions.html',
   styleUrls: ['./prescriptions.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule]  // <-- Add FormsModule here
+  imports: [FormsModule]  // <-- Add FormsModule here
 })
 export class Prescriptions implements OnInit, OnDestroy {
   isLoggedIn: boolean = false;
