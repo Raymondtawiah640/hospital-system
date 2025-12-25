@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';  // Import the AuthService
@@ -30,11 +30,9 @@ export class Schedules implements OnInit {
   successMessage: string = '';
   isLoggedIn: boolean = false;
 
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    private authService: AuthService
-  ) {}
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private authService = inject(AuthService);
 
   ngOnInit(): void {
     this.isLoggedIn = this.authService.loggedIn();

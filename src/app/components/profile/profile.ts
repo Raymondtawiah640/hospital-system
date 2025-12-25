@@ -1,5 +1,4 @@
-import { Component } from '@angular/core';
-
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
@@ -13,14 +12,15 @@ import { AuthService } from '../../services/auth';
 export class Profile {
   openDropdown: boolean = false;
 
-  constructor(public auth: AuthService, private router: Router) {}
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   get isLoggedIn(): boolean {
-    return this.auth.loggedIn();
+    return this.authService.loggedIn();
   }
 
   get staffName(): string {
-    return this.auth.getStaff()?.full_name || '';
+    return this.authService.getStaff()?.full_name || '';
   }
 
   toggleDropdown(): void {
@@ -36,7 +36,7 @@ export class Profile {
   }
 
   logout(): void {
-    this.auth.logout();
+    this.authService.logout();
     this.router.navigate(['/login']);
     this.closeMenu();
   }

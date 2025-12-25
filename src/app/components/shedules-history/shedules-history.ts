@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -27,7 +27,9 @@ export class ShedulesHistory implements OnInit, OnDestroy {
   showDeleteModal: boolean = false;
   scheduleToDelete: any = null;
 
-  constructor(private authService: AuthService, private http: HttpClient, private router: Router) {}
+  private authService = inject(AuthService);
+  private http = inject(HttpClient);
+  private router = inject(Router);
 
   // Clear timer when component is destroyed
   ngOnDestroy(): void {

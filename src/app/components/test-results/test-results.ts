@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
 import { FormsModule } from '@angular/forms';  // Import FormsModule to use ngModel
 import { AuthService } from '../../services/auth';  // Import your AuthService
 import { Router } from '@angular/router';  // Import Router for redirection
@@ -20,7 +19,9 @@ export class TestResults implements OnInit {
   searchTerm: string = ''; // Search term for filtering results
   isLoggedIn: boolean = false; // To check if the user is logged in
 
-  constructor(private http: HttpClient, private authService: AuthService, private router: Router) {}
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   ngOnInit(): void {
     // Check if the user is logged in

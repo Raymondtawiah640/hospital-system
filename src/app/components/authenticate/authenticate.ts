@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
@@ -49,11 +49,9 @@ export class Authenticate implements OnInit {
     'Finance'
   ];
 
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    private authService: AuthService
-  ) {}
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   ngOnInit(): void {
     const department = localStorage.getItem('department');

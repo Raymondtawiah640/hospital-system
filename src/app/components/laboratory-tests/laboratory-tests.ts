@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -66,7 +66,9 @@ export class LaboratoryTests implements OnInit {
   successMessage: string = ''; // Store success message
   errorMessage: string = ''; // Store error message
 
-  constructor(private http: HttpClient, private authService: AuthService, private router: Router) {}
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   ngOnInit(): void {
     // Check if the user is logged in

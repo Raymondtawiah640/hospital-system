@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -55,7 +55,9 @@ export class PharmacyStock implements OnInit {
   // Doctor data for name resolution
   doctors: any[] = [];
 
-  constructor(private http: HttpClient, private authService: AuthService, private router: Router) {}
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   // Method to set success message with auto-hide
   private setSuccessMessage(message: string): void {

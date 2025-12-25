@@ -1,4 +1,4 @@
-import { Component, NgZone, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -61,7 +61,9 @@ export class Login implements OnInit {
   // Password-based authentication system
   hasPasswordInDB: boolean = false;
 
-  constructor(private router: Router, private auth: AuthService, private ngZone: NgZone) {}
+  private router = inject(Router);
+  private auth = inject(AuthService);
+  private ngZone = inject(NgZone);
 
   ngOnInit(): void {
     // Initialize password status check

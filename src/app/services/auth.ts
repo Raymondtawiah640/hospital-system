@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable, tap, catchError, throwError, of } from 'rxjs';
 
@@ -25,7 +25,7 @@ export class AuthService {
 
   public loggedIn = signal<boolean>(!!localStorage.getItem('staff'));
 
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   login(staffId: string, department: string, password: string): Observable<LoginResponse> {
     // Trim inputs to avoid invisible characters

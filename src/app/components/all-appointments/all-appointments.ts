@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';  // Import Router to navigate
 import { AuthService } from '../../services/auth';  // Import AuthService
@@ -24,7 +24,11 @@ export class AllAppointments implements OnInit {
   // Action loading states
   isMarkingDone: boolean = false;
 
-  constructor(private http: HttpClient, private router: Router, private authService: AuthService) {}
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+
 
   ngOnInit(): void {
     this.checkLoginStatus();  // Check if the user is logged in when the component initializes

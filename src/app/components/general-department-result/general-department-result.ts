@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, NgZone, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -41,7 +41,9 @@ export class GeneralDepartmentResult implements OnInit {
   message: string = '';
   messageType: 'success' | 'error' = 'success';
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private ngZone: NgZone) {}
+  private http = inject(HttpClient);
+  private cdr = inject(ChangeDetectorRef);
+  private ngZone = inject(NgZone);
 
   ngOnInit(): void {
     this.loadConsultations();

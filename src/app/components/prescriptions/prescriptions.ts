@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';  // Ensure you have the AuthService
@@ -44,11 +44,9 @@ export class Prescriptions implements OnInit, OnDestroy {
   isLoading: boolean = false; // Loading flag
   private messageTimer: any;
 
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    private authService: AuthService  // <-- Inject AuthService
-  ) {}
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   // Method to set success message with auto-hide
   private setSuccessMessage(message: string): void {

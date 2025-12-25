@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
@@ -32,7 +32,10 @@ export class BookAppointment implements OnInit {
   doctorSearchTerm: string = '';   // Search term for doctors
   isLoggedIn: boolean = false;  // Variable to hold login status
 
-  constructor(private http: HttpClient, private cdRef: ChangeDetectorRef, private router: Router, private authService: AuthService) {}
+  private http = inject(HttpClient);
+  private cdRef = inject(ChangeDetectorRef);
+  private router = inject(Router);
+  private authService = inject(AuthService);
 
   ngOnInit(): void {
     // Check if the user is logged in, and redirect to login page if not

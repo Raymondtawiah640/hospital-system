@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -31,7 +31,10 @@ export class AddPatient implements OnInit {
   isLoading: boolean = false;
   isLoggedIn: boolean = false;
 
-  constructor(private http: HttpClient, private router: Router, private authService: AuthService) {}
+
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
         // Check login status when the component is initialized
         ngOnInit(): void {
